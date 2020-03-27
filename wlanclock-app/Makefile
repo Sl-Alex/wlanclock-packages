@@ -14,8 +14,8 @@ include $(INCLUDE_DIR)/package.mk
 
 # Package definition; instructs on how and where our package will appear in the overall configuration menu ('make menuconfig')
 define Package/$(PKG_NAME)
-	SECTION:=onion
-	CATEGORY:=Onion
+	SECTION:=wlanclock
+	CATEGORY:=wlanclock
 	SUBMENU:=Utilities
 	#VVV ,librt,libpthread
 	DEPENDS:=+libstdcpp
