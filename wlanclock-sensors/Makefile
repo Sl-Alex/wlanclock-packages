@@ -49,7 +49,7 @@ define Build/Compile
         $(PKG_BUILD_DIR)/src/i2c.o \
         $(PKG_BUILD_DIR)/src/bme280_wrapper.o \
         $(PKG_BUILD_DIR)/src/bme280.o \
-        $(PKG_BUILD_DIR)/src/bh1750.o \
+        $(PKG_BUILD_DIR)/src/bh1750.o
 endef
 
 # Package install instructions; create a directory inside the package to hold our executable, and then copy the executable we built previously into the folder
