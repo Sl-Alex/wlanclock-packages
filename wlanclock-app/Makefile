@@ -18,7 +18,7 @@ define Package/$(PKG_NAME)
 	CATEGORY:=wlanclock
 	SUBMENU:=Utilities
 	#VVV ,librt,libpthread
-	DEPENDS:=+libstdcpp
+	DEPENDS:=+libstdcpp +libubus +libubox
 	TITLE:=WlanClock main application
 endef
 
@@ -37,14 +37,17 @@ endef
 
 # Package build instructions; invoke the target-specific compiler to first compile the source file, and then to link the file into the final executable
 define Build/Compile
-	$(TARGET_CXX) $(TARGET_CFLAGS) -o $(PKG_BUILD_DIR)/src/main.opp -c $(PKG_BUILD_DIR)/src/main.cpp
-	$(TARGET_CXX) $(TARGET_LDFLAGS) -o $(PKG_BUILD_DIR)/$1 $(PKG_BUILD_DIR)/src/main.opp
+	$(MAKE) -C $(PKG_BUILD_DIR) \
+	CC="$(TARGET_CC)" \
+	CXX="$(TARGET_CXX)" \
+	CFLAGS="$(TARGET_CFLAGS)" \
+	LDFLAGS="$(TARGET_LDFLAGS)"
 endef
 
 # Package install instructions; create a directory inside the package to hold our executable, and then copy the executable we built previously into the folder
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
-	$(INSTALL_BIN) $(PKG_BUILD_DIR)/$(PKG_NAME) $(1)/usr/bin
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bin/$(PKG_NAME) $(1)/usr/bin
 endef
 
 # This command is always the last, it uses the definitions and variables we give above in order to get the job done

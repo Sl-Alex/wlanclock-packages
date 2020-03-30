@@ -13,6 +13,9 @@
 #include <linux/spi/spidev.h>
 
 #include <iostream>
+
+#include "UbusServer.h"
+#include "ubus_server.h"
  
 char buf[10];
 char buf2[10];
@@ -104,12 +107,11 @@ void spi_write(int file, char *buf, uint32_t sz)
     }
 }
 
-int main(void)	
+int main(void)
 {
     char const *spidev = "/dev/spidev0.1";
     char buf[4096];
 
-    /* Fill an array with some data */
     for (size_t i = 0; i < sizeof(buf); i++)
     {
         buf[i] = i % 0x100;
@@ -119,5 +121,22 @@ int main(void)
     spi_write(f, buf, sizeof(buf));
     close(f);
 
-    std::cout << "Done" << std::endl;
+    std::cout << "SPI access done" << std::endl;
+
+    std::cout << "Starting ubus server" << std::endl;
+    if (0 == UbusServer::getInstance().start())
+    {
+        std::cout << "Server started" << std::endl;
+    }
+    else
+    {
+        exit(1);
+    }
+
+    while(UbusServer::getInstance().isRunning())
+    {
+        usleep(10000);
+    }
+    UbusServer::getInstance().stop();
+    std::cout << "Terminated" << std::endl;
 }
