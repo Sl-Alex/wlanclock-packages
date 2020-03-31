@@ -84,6 +84,8 @@
                                     <listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="ubox"/>
                                     									
                                     <listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="ubus"/>
+                                    									
+                                    <listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="uci"/>
                                     								
                                 </option>
                                 								
@@ -268,6 +270,8 @@
                                     <listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="ubox"/>
                                     									
                                     <listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="ubus"/>
+                                    									
+                                    <listOptionValue builtIn="false" srcPrefixMapping="" srcRootPath="" value="uci"/>
                                     								
                                 </option>
                                 								
