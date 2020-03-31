@@ -18,7 +18,7 @@ define Package/$(PKG_NAME)
 	CATEGORY:=wlanclock
 	SUBMENU:=Utilities
 	#VVV ,librt,libpthread
-	DEPENDS:=+libstdcpp +libubus +libubox
+	DEPENDS:=+libstdcpp +libubus +libubox +libuci
 	TITLE:=WlanClock main application
 endef
 

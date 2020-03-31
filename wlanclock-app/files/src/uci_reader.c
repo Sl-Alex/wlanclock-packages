@@ -2,9 +2,11 @@
 #include <uci.h>
 #include <limits.h>
 
+#include "uci_reader.h"
+
 #define MAX_VALUE_LEN = LINE_MAX;
 
-char *uci_reader_get(char *file, char *section, char *param)
+char *uci_reader_get(char *file, char *section, char *key)
 {
     static char param_value[LINE_MAX];
     static char param_name[LINE_MAX];
@@ -13,11 +15,13 @@ char *uci_reader_get(char *file, char *section, char *param)
     struct  uci_context *c = uci_alloc_context();
     int UCI_LOOKUP_COMPLETE = (1 << 1);
 
-    if ((!file) || (!section) || (!param) || (!c))
+    if ((!file) || (!section) || (!key) || (!c))
     {
         uci_free_context(c);
         return NULL;
     }
+
+    snprintf(param_name, sizeof(param_name), "%s.%s.%s", file, section, key);
 
     if ((uci_lookup_ptr(c, &ptr, param_name, 1) != UCI_OK) ||
          (ptr.o==NULL))

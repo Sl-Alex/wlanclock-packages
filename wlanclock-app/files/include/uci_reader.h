@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-void uci_reader_get(char *file, char *section, char *param, char **value);
+char *uci_reader_get(char *file, char *section, char *key);
 
 #ifdef __cplusplus
 }
