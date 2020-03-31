@@ -18,7 +18,7 @@ define Package/$(PKG_NAME)
 	CATEGORY:=wlanclock
 	SUBMENU:=Utilities
 	#VVV ,librt,libpthread
-	DEPENDS:=+libstdcpp
+	DEPENDS:=+libubus +libubox +libblobmsg-json +libjson-c
 	TITLE:=WlanClock sensors reader
 endef
 

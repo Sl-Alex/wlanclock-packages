@@ -25,7 +25,7 @@ all: info $(TARGET)
 $(TARGET): $(OBJECTS) 
 	@mkdir -p $(BINDIR)
 	@echo " Linking..."
-	$(CC) $^ $(CFLAGS) $(LDFLAGS) -o $(TARGET)
+	$(CC) $^ $(CFLAGS) $(LDFLAGS) -lubus -lubox -lblobmsg_json -ljson-c -o $(TARGET)
 
 
 # generic: build any object file required
