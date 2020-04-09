@@ -28,7 +28,7 @@ all: info $(TARGET)
 $(TARGET): $(OBJECTS_C) $(OBJECTS_CPP)
 	@mkdir -p $(BINDIR)
 	@echo " Linking..."
-	$(CXX) $^ $(CFLAGS) $(LDFLAGS) -lubox -lubus -luci -o $(TARGET)
+	$(CXX) $^ $(CFLAGS) $(LDFLAGS) -lubox -lubus -luci -lfreetype -o $(TARGET)
 
 # generic: build any object file required
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT_C)
