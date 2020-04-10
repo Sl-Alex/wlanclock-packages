@@ -23,6 +23,8 @@ INC := $(shell find $(INCDIR) -maxdepth 1 -type d -exec echo -I {}  \;)
 APP0 := wlanclock-app
 TARGET := $(BINDIR)/$(APP0)
 
+LIBFREETYPE_CFLAGS:=$(shell $(PKG_CONFIG) --cflags freetype2)
+
 all: info $(TARGET)
 
 $(TARGET): $(OBJECTS_C) $(OBJECTS_CPP)
@@ -37,7 +39,7 @@ $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT_C)
 
 $(BUILDDIR)/%.opp: $(SRCDIR)/%.$(SRCEXT_CPP)
 	@mkdir -p $(dir $@)
-	$(CXX) $(CFLAGS) $(INC) -c -o $@ $<
+	$(CXX) $(CFLAGS) $(LIBFREETYPE_CFLAGS) $(INC) -c -o $@ $<
 
 clean:
 	@echo " Cleaning..."; 

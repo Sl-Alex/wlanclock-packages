@@ -92,3 +92,16 @@ void AbstractCanvas::drawRect(int x1, int y1, int x2, int y2, rgba32_t value)
     }
     drawLine(x1,y2, x2,y2, value);
 }
+
+int AbstractCanvas::drawText(int x1, int y1, std::string font, int sz, std::string text)
+{
+    FT_Library  library;
+    int rc = FT_Init_FreeType(&library);
+    if (rc != 0)
+    {
+        return rc;
+    }
+
+    FT_Done_FreeType( library );
+    return 0;
+}

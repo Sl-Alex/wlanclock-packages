@@ -21,13 +21,13 @@ void spi_write(int file, void *buf, uint32_t sz)
     int status;
 
     struct spi_ioc_transfer xfer;
-    xfer.cs_change = 0;   /* Keep CS activated */
-    xfer.delay_usecs = 0;
-    xfer.speed_hz = 10000000;
-    xfer.bits_per_word = 8;
+    memset(&xfer, 0, sizeof(xfer));
 
-    xfer.rx_buf = (unsigned long)NULL;
-    xfer.pad = 0;
+    xfer.speed_hz = 10000000;
+    xfer.delay_usecs = 0;
+    xfer.bits_per_word = 8;
+    xfer.tx_nbits = 8;
+    xfer.rx_nbits = 8;
 
     uint32_t cnt = 0;
     while (sz)
