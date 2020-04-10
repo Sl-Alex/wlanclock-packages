@@ -75,7 +75,6 @@ void SpiDisplayInterface::spi_loop(void)
             usleep(1);
             gpio_ctrl_set_value(mGpio, 1);
             spi_write(mSpiFd, mDisplayBuffer[newDataIndex], mDisplayBufferSize);
-            //spi_write(mSpiFd, mDisplayBuffer[newDataIndex], 4096);
         }
     }
 }
@@ -115,8 +114,32 @@ int SpiDisplayInterface::stop(void)
 
 uint32_t SpiDisplayInterface::prepareConfig(void)
 {
-    uint16_t cfg1 = 0b0111000000000000;
-    uint16_t cfg2 = 0b0000000001000000;
+    /* Here we prepare FM6126A configuration registers */
+
+    /* These are default bits without brightness */
+    constexpr uint16_t CFG1_DEFAULT = 0x7000;
+    constexpr uint16_t CFG2_DEFAULT = 0x0040;
+
+    /* Brightness has 6 bits */
+    constexpr uint16_t MAX_BRIGHTNESS = (1 << 6) - 1;
+
+    int br = mBrightness;
+
+    /* Brightness range is 0..100 */
+    if (br > 100) br = 100;
+    if (br <   0) br = 0;
+
+    /* Convert range of 0..100 to 0..MAX_BRIGHTNESS */
+    br = (MAX_BRIGHTNESS * br) / 100;
+
+    /* Brightness in FM6126A consists of two parts */
+    uint16_t lower_2 = br & 0x03;
+    uint16_t upper_4 = (br >> 2) & 0x0F;
+    /* Lower two bits shall be inverted */
+    lower_2 = (~lower_2) & 0x03;
+
+    uint16_t cfg1 = CFG1_DEFAULT | (upper_4 << 7) | (lower_2 << 2);
+    uint16_t cfg2 = CFG2_DEFAULT;
     return ((uint32_t)cfg1 << 16) | cfg2;
 }
 

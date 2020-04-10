@@ -6,9 +6,17 @@
 extern "C" {
 #endif
 
-int ubus_server_init();
-int ubus_server_deinit();
-int ubus_server_is_running();
+typedef void (*ubus_cb_gesture_t      )(uint32_t value);
+typedef void (*ubus_cb_brightness_t   )(uint32_t value);
+typedef void (*ubus_cb_pres_hum_temp_t)(double pressure, double humidity, double temperature);
+
+void ubus_server_set_cb_gesture      (ubus_cb_gesture_t       cb);
+void ubus_server_set_cb_brightness   (ubus_cb_brightness_t    cb);
+void ubus_server_set_cb_pres_hum_temp(ubus_cb_pres_hum_temp_t cb);
+
+int  ubus_server_init();
+void ubus_server_deinit();
+int  ubus_server_is_running();
 
 #ifdef __cplusplus
 }

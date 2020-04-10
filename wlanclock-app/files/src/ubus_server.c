@@ -1,11 +1,11 @@
 #include <pthread.h>
 #include <libubus.h>
 
+#include "ubus_server.h"
+
 static struct ubus_context *ctx;
 static struct ubus_request_data req_data;
 static struct blob_buf  bb;
-
-void ubus_server_deinit();
 
 static int wlanclock_data_handler(
         struct ubus_context *ctx, struct ubus_object *obj,
@@ -29,6 +29,25 @@ enum {
     WLANCLOCK_DATA_TEMPERATURE,
     __WLANCLOCK_DATA_MAX,
 };
+
+static ubus_cb_gesture_t       cb_gesture       = NULL;
+static ubus_cb_brightness_t    cb_brightness    = NULL;
+static ubus_cb_pres_hum_temp_t cb_pres_hum_temp = NULL;
+
+void ubus_server_set_cb_gesture      (ubus_cb_gesture_t       cb)
+{
+    cb_gesture = cb;
+}
+
+void ubus_server_set_cb_brightness   (ubus_cb_brightness_t    cb)
+{
+    cb_brightness = cb;
+}
+
+void ubus_server_set_cb_pres_hum_temp(ubus_cb_pres_hum_temp_t cb)
+{
+    cb_pres_hum_temp = cb;
+}
 
 /* Ubus Policy */
 static const struct blobmsg_policy wlanclock_data_policy[] =
@@ -75,15 +94,34 @@ static int wlanclock_data_handler( struct ubus_context *ctx, struct ubus_object 
     /* print request msg */
     printf("Receive msg from caller:\n");
     if(tb[WLANCLOCK_DATA_GESTURE])
-         printf("   Gesture     = %u\n",   blobmsg_get_u32   (tb[WLANCLOCK_DATA_GESTURE]));
+    {
+        uint32_t gesture = blobmsg_get_u32   (tb[WLANCLOCK_DATA_GESTURE]);
+        if (cb_gesture)
+            cb_gesture(gesture);
+        printf("   Gesture     = %u\n",   gesture);
+    }
     if(tb[WLANCLOCK_DATA_BRIGHTNESS])
-         printf("   Brightness  = %u\n",   blobmsg_get_u32   (tb[WLANCLOCK_DATA_BRIGHTNESS]));
-    if(tb[WLANCLOCK_DATA_PRESSURE])
-         printf("   Pressure    = %.2f\n", blobmsg_get_double(tb[WLANCLOCK_DATA_PRESSURE]));
-    if(tb[WLANCLOCK_DATA_HUMIDITY])
-         printf("   Humidity    = %.2f\n", blobmsg_get_double(tb[WLANCLOCK_DATA_HUMIDITY]));
-    if(tb[WLANCLOCK_DATA_TEMPERATURE])
-         printf("   Temperature = %.2f\n", blobmsg_get_double(tb[WLANCLOCK_DATA_TEMPERATURE]));
+    {
+        uint32_t brightness = blobmsg_get_u32   (tb[WLANCLOCK_DATA_BRIGHTNESS]);
+        if (cb_brightness)
+            cb_brightness(brightness);
+        printf("   Brightness  = %u\n",   brightness);
+    }
+    if(tb[WLANCLOCK_DATA_PRESSURE] && tb[WLANCLOCK_DATA_HUMIDITY] && tb[WLANCLOCK_DATA_TEMPERATURE])
+    {
+        double pressure = blobmsg_get_double(tb[WLANCLOCK_DATA_PRESSURE]);
+        double humidity = blobmsg_get_double(tb[WLANCLOCK_DATA_HUMIDITY]);
+        double temperature = blobmsg_get_double(tb[WLANCLOCK_DATA_TEMPERATURE]);
+        printf("   Pressure    = %.2f\n", pressure);
+        printf("   Humidity    = %.2f\n", humidity);
+        printf("   Temperature = %.2f\n", temperature);
+        if (cb_pres_hum_temp)
+            cb_pres_hum_temp(pressure, humidity, temperature);
+    }
+    else if (tb[WLANCLOCK_DATA_PRESSURE] || tb[WLANCLOCK_DATA_HUMIDITY] || tb[WLANCLOCK_DATA_TEMPERATURE])
+    {
+        fprintf(stderr, "Pressure, humidity or temperature is missing. All must be in one message\n");
+    }
 
     /* Do some job here according to caller's request */
 
