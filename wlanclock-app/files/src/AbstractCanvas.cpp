@@ -1,8 +1,15 @@
+#include "Fonts.h"
 #include "AbstractCanvas.h"
 #include <cstdlib>
 #include <algorithm>
+#include <iostream>
 #include <ft2build.h>
 #include FT_FREETYPE_H
+
+void AbstractCanvas::clear()
+{
+    memset(mData, 0, mSize);
+}
 
 void AbstractCanvas::drawLine(int x1, int y1, int x2, int y2, rgba32_t value)
 {
@@ -93,15 +100,42 @@ void AbstractCanvas::drawRect(int x1, int y1, int x2, int y2, rgba32_t value)
     drawLine(x1,y2, x2,y2, value);
 }
 
-int AbstractCanvas::drawText(int x1, int y1, std::string font, int sz, std::string text)
+int AbstractCanvas::drawText(int x1, int y1, int fontIndex, int size_h, int size_v, std::string text)
 {
-    FT_Library  library;
-    int rc = FT_Init_FreeType(&library);
-    if (rc != 0)
+    FT_Face face = Fonts::getInstance().getFontFace(fontIndex);
+    FT_Set_Pixel_Sizes(face, size_h, size_v);
+    int off_x = 0;
+    int off_y = 0;
+    for (size_t i = 0; i < text.length(); i++)
     {
-        return rc;
+        unsigned int glyph_index = FT_Get_Char_Index( face, text[i] );
+        int rc = FT_Load_Glyph(
+                  face,          /* handle to face object */
+                  glyph_index,   /* glyph index           */
+                  FT_LOAD_DEFAULT );
+        if (rc)
+        {
+            std::cout << "Can't load glyph, rc = " << rc << std::endl;
+            return rc;
+        }
+        rc = FT_Render_Glyph( face->glyph,   /* glyph slot  */
+                                 FT_RENDER_MODE_NORMAL ); /* render mode */
+        unsigned char *pdata = face->glyph->bitmap.buffer;
+
+        off_y = face->glyph->bitmap_top;
+
+        unsigned int horiBearX = face->glyph->metrics.horiBearingX >> 6;
+
+        for (unsigned int y = 0; y < face->glyph->bitmap.rows; y++)
+        {
+            for (unsigned int x = 0; x < face->glyph->bitmap.width; x++)
+            {
+                setPixel(x1 + x + off_x + horiBearX, y1 + y - off_y, 0xFF800000 | *pdata);
+                pdata++;
+            }
+        }
+        off_x += (face->glyph->advance.x >> 6);
     }
 
-    FT_Done_FreeType( library );
     return 0;
 }

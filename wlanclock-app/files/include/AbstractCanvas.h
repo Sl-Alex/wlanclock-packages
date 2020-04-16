@@ -22,7 +22,8 @@ class AbstractCanvas
 
         void drawLine(int x1, int y1, int x2, int y2, rgba32_t value);
         void drawRect(int x1, int y1, int x2, int y2, rgba32_t value);
-        int  drawText(int x1, int y1, std::string font, int sz, std::string text);
+        int  drawText(int x1, int y1, int fontIndex, int size_h, int size_v, std::string text);
+        void clear(void);
 
         int   getSize() { return mSize; }
         char *getData() { return mData; }

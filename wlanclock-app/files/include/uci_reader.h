@@ -6,7 +6,10 @@
 extern "C" {
 #endif
 
-char *uci_reader_get(char *file, char *section, char *key);
+typedef void (*uci_cb_list_element_t)(char* value);
+
+char *uci_reader_get(const char *file, const char *section, const char *key);
+int uci_reader_get_list(const char *file, const char *section, const char *key, uci_cb_list_element_t cb);
 
 #ifdef __cplusplus
 }
