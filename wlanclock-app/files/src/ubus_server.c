@@ -70,7 +70,7 @@ static struct ubus_object_type wlanclock_data_obj_type =
     UBUS_OBJECT_TYPE("wlanclock_uobj", wlanclock_data_methods);
 
 /* Ubus object */
-static struct ubus_object wlanclock_data_obj =
+struct ubus_object wlanclock_data_obj =
 {
     .name = "wlanclock.app",
     .type = &wlanclock_data_obj_type,
@@ -172,8 +172,6 @@ int ubus_server_init()
         printf("Fail to register an object to ubus.\n");
         ubus_free(ctx);
         return 1;
-    } else {
-        printf("Add '%s' to ubus @%u successfully.\n", wlanclock_data_obj.name, wlanclock_data_obj.id);
     }
 
     ubus_server_running = 1;

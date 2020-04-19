@@ -30,7 +30,6 @@ static char *get_gpio_folder(int gpio_nr)
     {
         return NULL;
     }
-    fprintf(stdout, "%s\n", (char *)gpio_path);
     return (char *)gpio_path;
 }
 

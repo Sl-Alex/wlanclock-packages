@@ -1,5 +1,6 @@
 #include "UbusServer.h"
 #include "ubus_server.h"
+#include <iostream>
 
 UbusServer::UbusServer()
 {
@@ -10,12 +11,18 @@ int UbusServer::start(void)
     ubus_server_set_cb_gesture(uBusCbGesture);
     ubus_server_set_cb_brightness(uBusCbBrightness);
     ubus_server_set_cb_pres_hum_temp(uBusCbPresHumTemp);
-    return ubus_server_init();
+    int rc = ubus_server_init();
+    if (0 == rc)
+    {
+        std::cout << "UbusServer started at " << wlanclock_data_obj.name << std::endl;
+    }
+    return rc;
 }
 
 int UbusServer::stop(void)
 {
     ubus_server_deinit();
+    std::cout << "UbusServer stopped" << std::endl;
     return 0;
 }
 

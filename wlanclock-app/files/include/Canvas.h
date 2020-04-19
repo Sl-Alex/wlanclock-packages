@@ -18,6 +18,8 @@ class Canvas: public AbstractCanvas
 
         virtual void setPixel(int x, int y, rgba32_t value);
         virtual rgba32_t getPixel(int x, int y);
+        virtual void setPixelRaw(int x, int y, uint32_t value);
+        virtual uint32_t getPixelRaw(int x, int y);
 
     private:
 };

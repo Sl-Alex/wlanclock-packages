@@ -12,7 +12,7 @@
 class SpiDisplayInterface : public AbstractDisplayInterface
 {
     public:
-        SpiDisplayInterface(std::string spidev, int dat_ncfg_gpio);
+        SpiDisplayInterface();
         virtual ~SpiDisplayInterface();
 
         virtual int start(void);
@@ -30,6 +30,11 @@ class SpiDisplayInterface : public AbstractDisplayInterface
         int mBrightness;
         int mSpiFd;
         int mGpio;
+
+        static constexpr const char* CONFIG_FILE          = "wlanclock";
+        static constexpr const char* CONFIG_SECTION       = "app";
+        static constexpr const char* CONFIG_KEY_SPIDEV    = "device";
+        static constexpr const char* CONFIG_KEY_GPIO      = "dat_ncfg_gpio";
 
         std::mutex mThreadMutex;
         std::thread *mThread;

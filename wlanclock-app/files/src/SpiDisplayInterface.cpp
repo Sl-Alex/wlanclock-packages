@@ -1,22 +1,30 @@
 #include "SpiDisplayInterface.h"
 #include "gpio_ctrl.h"
 #include "spi_ctrl.h"
+#include "uci_reader.h"
 
 #include "unistd.h"
 #include <iostream>
 #include <limits>
 
-SpiDisplayInterface::SpiDisplayInterface(std::string spidev, int dat_ncfg_gpio)
+SpiDisplayInterface::SpiDisplayInterface()
     :mBrightness(0)
-    ,mGpio(dat_ncfg_gpio)
     ,mThread(nullptr)
     ,mDisplayBufferIndex(0)
     ,mNewBrightness(false)
     ,mNewDisplayData(false)
 {
+    char *dat_ncfg_gpio = uci_reader_get(CONFIG_FILE, CONFIG_SECTION, CONFIG_KEY_GPIO);
+    if (dat_ncfg_gpio)
+    {
+        mGpio = std::stoi(dat_ncfg_gpio);
+    }
     gpio_ctrl_init(mGpio);
     gpio_ctrl_set_dir(mGpio, GPIO_CTRL_DIR_OUT);
-    mSpiFd = spi_init(spidev.c_str(), SPI_SPEED);
+
+    char *spidev = uci_reader_get(CONFIG_FILE, CONFIG_SECTION, CONFIG_KEY_SPIDEV);
+    mSpiFd = spi_init(spidev, SPI_SPEED);
+
     mDisplayBuffer[0] = nullptr;
     mDisplayBuffer[1] = nullptr;
 }
@@ -89,6 +97,8 @@ int SpiDisplayInterface::start(void)
     /* Start a separate thread which sends everything over SPI */
     mStopThread = false;
     mThread = new std::thread(&SpiDisplayInterface::spi_loop, this);
+    std::cout << "displayInterface started" << std::endl;
+
     return 0;
 }
 
@@ -109,6 +119,7 @@ int SpiDisplayInterface::stop(void)
     mThread->join();
     delete mThread;
     mThread = nullptr;
+    std::cout << "displayInterface stopped" << std::endl;
     return 0;
 }
 

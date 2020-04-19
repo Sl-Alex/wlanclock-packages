@@ -30,6 +30,7 @@ int Fonts::init()
     {
         return 1;
     }
+    mFontsDir = ret;
     return uci_reader_get_list(CONFIG_FILE, CONFIG_SECTION, CONFIG_KEY_FONTS, uciFonstCb);
 }
 

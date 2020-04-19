@@ -100,7 +100,7 @@ void AbstractCanvas::drawRect(int x1, int y1, int x2, int y2, rgba32_t value)
     drawLine(x1,y2, x2,y2, value);
 }
 
-int AbstractCanvas::drawText(int x1, int y1, int fontIndex, int size_h, int size_v, std::string text)
+int AbstractCanvas::drawText(int x1, int y1, int fontIndex, int size_h, int size_v, std::string text, rgba32_t color)
 {
     FT_Face face = Fonts::getInstance().getFontFace(fontIndex);
     FT_Set_Pixel_Sizes(face, size_h, size_v);
@@ -130,7 +130,7 @@ int AbstractCanvas::drawText(int x1, int y1, int fontIndex, int size_h, int size
         {
             for (unsigned int x = 0; x < face->glyph->bitmap.width; x++)
             {
-                setPixel(x1 + x + off_x + horiBearX, y1 + y - off_y, 0xFF800000 | *pdata);
+                setPixel(x1 + x + off_x + horiBearX, y1 + y - off_y, (color & 0xFFFFFF00) | *pdata);
                 pdata++;
             }
         }

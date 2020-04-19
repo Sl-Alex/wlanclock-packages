@@ -10,9 +10,8 @@ Canvas<CANVAS_COLOR_4BIT>::Canvas(int width, int height)
 {
     /* 2 bytes per pixel */
     mSize = width*height*2;
-    mData = new char[mSize];
+    mData = new uint8_t[mSize];
     memset(mData, 0, mSize);
-    std::cout << "Allocating " << mSize << " bytes for canvas" << std::endl;
 }
 
 template<>
@@ -71,6 +70,32 @@ void Canvas<CANVAS_COLOR_4BIT>::setPixel(int x, int y, rgba32_t value)
     mData[y * mWidth * 2 + x * 2 + 1] = dst_value & 0xFF;
 }
 
+template<>
+uint32_t Canvas<CANVAS_COLOR_4BIT>::getPixelRaw(int x, int y)
+{
+    if ((x >= mWidth) || (y >= mHeight) || (x < 0) || (y < 0))
+    {
+        return 0;
+    }
+    uint32_t ret_value = mData[y * mWidth * 2 + x * 2];
+    ret_value = ret_value << 8;
+    ret_value |= mData[y * mWidth * 2 + x * 2 + 1];
+
+    return ret_value;
+}
+
+template<>
+void Canvas<CANVAS_COLOR_4BIT>::setPixelRaw(int x, int y, uint32_t value)
+{
+    if ((x >= mWidth) || (y >= mHeight) || (x < 0) || (y < 0))
+    {
+        return;
+    }
+
+    mData[y * mWidth * 2 + x * 2] = (value >> 8) & 0xFF;
+    mData[y * mWidth * 2 + x * 2 + 1] = value & 0xFF;
+}
+
 /***************************************************************
  * Template instantiations for 4 bits per color
  **************************************************************/
@@ -90,6 +115,19 @@ rgba32_t Canvas<CANVAS_COLOR_5BIT>::getPixel(int x, int y)
 
 template<>
 void Canvas<CANVAS_COLOR_5BIT>::setPixel(int x, int y, rgba32_t value)
+{
+    std::cerr << "5 bit canvas is not implemented" << std::endl;
+}
+
+template<>
+uint32_t Canvas<CANVAS_COLOR_5BIT>::getPixelRaw(int x, int y)
+{
+    std::cerr << "5 bit canvas is not implemented" << std::endl;
+    return 0;
+}
+
+template<>
+void Canvas<CANVAS_COLOR_5BIT>::setPixelRaw(int x, int y, uint32_t value)
 {
     std::cerr << "5 bit canvas is not implemented" << std::endl;
 }

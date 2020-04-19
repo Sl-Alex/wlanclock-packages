@@ -6,6 +6,7 @@
 #include "SysTimer.h"
 #include "UbusServer.h"
 #include "Fonts.h"
+#include "Animator.h"
 
 class Desktop: public ISysTimer, public IGestureReceiver
 {
@@ -25,10 +26,13 @@ class Desktop: public ISysTimer, public IGestureReceiver
         const std::string FONT_HOURS_MINS = "HOURS_MINS";
         const std::string FONT_SECONDS    = "SECONDS";
 
+        AbstractCanvas *mDestCanvas;
         AbstractCanvas *mBgCanvas;
+        AbstractCanvas *mFgCanvas;
         AbstractDisplayInterface & mDisplayInterface;
         Fonts::FontParams mHourMinParams;
         Fonts::FontParams mSecParams;
+        Animator mAnimator;
 };
 
 #endif /* DESKTOP_H */

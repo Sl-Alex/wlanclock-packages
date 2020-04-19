@@ -35,7 +35,7 @@ class BrightnessReceiver: public IBrightnessReceiver
  
 int main(void)
 {
-    SpiDisplayInterface displayInterface("/dev/spidev0.1", 1);
+    SpiDisplayInterface displayInterface;
     BrightnessReceiver brigthness_receiver;
     Fonts::getInstance().init();
 
@@ -45,15 +45,10 @@ int main(void)
     Desktop desktop(displayInterface);
     desktop.init();
 
-    std::cout << "displayInterface started" << std::endl;
 
     UbusServer::getInstance().registerReceiver(brigthness_receiver);
 
-    if (0 == UbusServer::getInstance().start())
-    {
-        std::cout << "UbusServer started" << std::endl;
-    }
-    else
+    if (0 != UbusServer::getInstance().start())
     {
         exit(1);
     }
@@ -70,10 +65,7 @@ int main(void)
     }
 
     UbusServer::getInstance().stop();
-    std::cout << "UbusServer stopped" << std::endl;
-
     displayInterface.stop();
-    std::cout << "displayInterface stopped" << std::endl;
 
     std::cout << "Done" << std::endl;
 }
