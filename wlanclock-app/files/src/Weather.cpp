@@ -1,5 +1,5 @@
 #include "Weather.h" 
-#include "main.h"
+#include "Config.h"
 #include <json-c/json.h>
 #include <curl/curl.h>
 #include <stdio.h>

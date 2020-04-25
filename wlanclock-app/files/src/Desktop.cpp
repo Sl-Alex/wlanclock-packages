@@ -1,11 +1,12 @@
 #include "Desktop.h"
 #include "Canvas.h"
-#include "main.h"
+#include "Config.h"
 #include <iostream>
 
 Desktop::Desktop(AbstractDisplayInterface &displayIface)
     : mDisplayInterface(displayIface)
     , mMenuForecast(nullptr)
+    , mMenuLocalStatus(nullptr)
 {
     SysTimer::getInstance().subscribe(*this, Config::Display::UPDATE_INTERVAL, true);
     mBgCanvas   = new Canvas<CANVAS_COLOR_4BIT>(Config::Display::WIDTH, Config::Display::HEIGHT);
@@ -20,34 +21,14 @@ Desktop::~Desktop()
     delete mFgCanvas;
 }
 
-int Desktop::init()
-{
-    int rc = 0;
-    rc  = Fonts::getInstance().loadFontParams(FONT_HOURS_MINS, mHourMinParams);
-    rc |= Fonts::getInstance().loadFontParams(FONT_SECONDS,    mSecParams);
-    return rc;
-}
-
 void Desktop::drawDesktop()
 {
     char buff[100];
     snprintf(buff, sizeof(buff), "%02d:%02d", mTm.tm_hour, mTm.tm_min);
     mFgCanvas->clear();
-    mFgCanvas->drawText(
-            mHourMinParams.base_x,
-            mHourMinParams.base_y,
-            mHourMinParams.index,
-            mHourMinParams.size_h,
-            mHourMinParams.size_v,
-            std::string(buff), mColor);
+    mFgCanvas->drawText(Config::Fonts::PARAMS[Config::Fonts::FONT_HOURS_MINS], std::string(buff), mColor);
     snprintf(buff, sizeof(buff), "%02d", mTm.tm_sec);
-    mFgCanvas->drawText(
-            mSecParams.base_x,
-            mSecParams.base_y,
-            mSecParams.index,
-            mSecParams.size_h,
-            mSecParams.size_v,
-            std::string(buff), mColor);
+    mFgCanvas->drawText(Config::Fonts::PARAMS[Config::Fonts::FONT_SECONDS], std::string(buff), mColor);
 }
 
 void Desktop::onTimer()

@@ -39,7 +39,6 @@ int main(void)
     BrightnessController::getInstance().setDisplayInterface(&displayInterface);
 
     Desktop desktop(displayInterface);
-    desktop.init();
 
     PngStorage::getInstance().init();
     PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/refresh.png");

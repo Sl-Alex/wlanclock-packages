@@ -2,7 +2,7 @@
 #include "PresHumTempController.h"
 #include "PngStorage.h"
 #include "Canvas.h"
-#include "main.h"
+#include "Config.h"
 #include <iostream>
 
 MenuLocalStatus::MenuLocalStatus(AbstractDisplayInterface &displayIface, IMenuInteraction *menuInterface)
@@ -47,27 +47,14 @@ void MenuLocalStatus::drawCurrentStatus()
 
     mFgCanvas->clear();
     PngStorage::getInstance().getCanvas("/usr/share/wlanclock/images/house.png")->copyTo(*mFgCanvas, 3, 0);
-    mFgCanvas->drawText(
-            36, // mSecParams.base_x,
-            10, // mSecParams.base_y,
-            0,  // mSecParams.index,
-            12, // mSecParams.size_h,
-            12, //mSecParams.size_v,
-            line1, 0xFF500000);
-    mFgCanvas->drawText(
-            36, // mSecParams.base_x,
-            20, // mSecParams.base_y,
-            0,  // mSecParams.index,
-            12, // mSecParams.size_h,
-            12, //mSecParams.size_v,
-            line2, 0xFF700000);
-    mFgCanvas->drawText(
-            36, // mSecParams.base_x,
-            30, // mSecParams.base_y,
-            0,  // mSecParams.index,
-            12, // mSecParams.size_h,
-            12, //mSecParams.size_v,
-            line3, 0xC0A00000);
+    Config::Fonts::Params params;
+    params = Config::Fonts::PARAMS[Config::Fonts::FONT_WEATHER];
+    params.base_y = 10;
+    mFgCanvas->drawText(params, line1, 0xFF500000);
+    params.base_y = 20;
+    mFgCanvas->drawText(params, line2, 0xFF700000);
+    params.base_y = 30;
+    mFgCanvas->drawText(params, line3, 0xC0A00000);
 }
 
 void MenuLocalStatus::onGesture(IGestureReceiver::Gesture gesture)

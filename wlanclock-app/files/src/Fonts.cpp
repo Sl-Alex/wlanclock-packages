@@ -1,4 +1,5 @@
 #include "Fonts.h"
+#include "Config.h"
 #include <cstring>
 #include <unistd.h>
 #include <iostream>
@@ -25,18 +26,11 @@ Fonts::~Fonts()
 
 int Fonts::init()
 {
-    char *ret = uci_reader_get(CONFIG_FILE, CONFIG_SECTION, CONFIG_KEY_FONTS_DIR);
-    if (!ret)
+    for (size_t i = 0; i < sizeof(Config::Fonts::FONTS)/sizeof(Config::Fonts::FONTS[0]); i++)
     {
-        return 1;
+        Fonts::getInstance().loadFont(Config::Fonts::FONTS[i]);
     }
-    mFontsDir = ret;
-    return uci_reader_get_list(CONFIG_FILE, CONFIG_SECTION, CONFIG_KEY_FONTS, uciFonstCb);
-}
-
-void Fonts::uciFonstCb(char* value)
-{
-    Fonts::getInstance().loadFont(value);
+    return 0;
 }
 
 FT_Face Fonts::getFontFace(size_t index)
@@ -48,39 +42,9 @@ FT_Face Fonts::getFontFace(size_t index)
     return mFtFaces[index];
 }
 
-int Fonts::loadFontParams(std::string paramsName, FontParams &params)
-{
-    char *value;
-    value = uci_reader_get(CONFIG_FILE, paramsName.c_str(), FONT_KEY_INDEX);
-    if (!value)
-        return 1;
-    params.index = std::stoi(value);
-
-    value = uci_reader_get(CONFIG_FILE, paramsName.c_str(), FONT_KEY_SIZE_H);
-    if (!value)
-        return 1;
-    params.size_h = std::stoi(value);
-
-    value = uci_reader_get(CONFIG_FILE, paramsName.c_str(), FONT_KEY_SIZE_V);
-    if (!value)
-        return 1;
-    params.size_v = std::stoi(value);
-
-    value = uci_reader_get(CONFIG_FILE, paramsName.c_str(), FONT_KEY_BASE_X);
-    if (!value)
-        return 1;
-    params.base_x = std::stoi(value);
-
-    value = uci_reader_get(CONFIG_FILE, paramsName.c_str(), FONT_KEY_BASE_Y);
-    if (!value)
-        return 1;
-    params.base_y = std::stoi(value);
-    return 0;
-}
-
 int Fonts::loadFont(std::string fontName)
 {
-    std::string path = mFontsDir + fontName;
+    std::string path = std::string(Config::Fonts::FONTS_DIR)+ fontName;
     FT_Face face;
     int rc = FT_New_Face( mFtLibrary,
             path.c_str(),

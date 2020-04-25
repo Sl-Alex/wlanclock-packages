@@ -2,7 +2,7 @@
 #define SPIDISPLAYINTERFACE_H
 
 #include <string>
-#include "main.h"
+#include "Config.h"
 #include "AbstractDisplayInterface.h"
 #include "spi_ctrl.h"
 #include <mutex>

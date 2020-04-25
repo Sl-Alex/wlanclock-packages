@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include "Config.h"
 
 typedef uint32_t rgba32_t;
 
@@ -31,8 +32,8 @@ class AbstractCanvas
 
         void drawLine(int x1, int y1, int x2, int y2, rgba32_t value);
         void drawRect(int x1, int y1, int x2, int y2, rgba32_t value);
-        int  drawText(int x1, int y1, int fontIndex, int size_h, int size_v, std::string text, rgba32_t color);
-        int  drawText(int x1, int y1, int fontIndex, int size_h, int size_v, std::wstring text, rgba32_t color);
+        int  drawText(Config::Fonts::Params params, std::string text, rgba32_t color);
+        int  drawText(Config::Fonts::Params params, std::wstring text, rgba32_t color);
         void copyAreaTo(Area area, AbstractCanvas &canvas, int to_x = 0, int to_y = 0);
         void copyTo(AbstractCanvas &canvas, int to_x = 0, int to_y = 0);
         void clear(void);

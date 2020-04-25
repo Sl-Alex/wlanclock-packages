@@ -1,4 +1,4 @@
-#include "main.h"
+#include "Config.h"
 #include "BrightnessController.h"
 #include <iostream>
 

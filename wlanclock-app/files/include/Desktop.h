@@ -17,22 +17,15 @@ class Desktop: public ISysTimer, public IGestureReceiver, public IMenuInteractio
         Desktop(AbstractDisplayInterface &displayIface);
         ~Desktop();
 
-        int init(void);
-
     private:
         void drawDesktop();
         void onTimer();
         void onGesture(Gesture gesture);
         void onMenuAction(IMenuInteraction::MenuAction action);
 
-        const std::string FONT_HOURS_MINS = "HOURS_MINS";
-        const std::string FONT_SECONDS    = "SECONDS";
-
         AbstractCanvas *mBgCanvas;
         AbstractCanvas *mFgCanvas;
         AbstractDisplayInterface & mDisplayInterface;
-        Fonts::FontParams mHourMinParams;
-        Fonts::FontParams mSecParams;
         Animator mAnimator;
         Gesture mLastGesture;
         rgba32_t mColor;

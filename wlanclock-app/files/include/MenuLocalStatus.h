@@ -29,8 +29,6 @@ class MenuLocalStatus: public ISysTimer, public IGestureReceiver, public IMenuIn
         AbstractCanvas *mBgCanvas;
         AbstractCanvas *mFgCanvas;
         AbstractDisplayInterface & mDisplayInterface;
-        Fonts::FontParams mHourMinParams;
-        Fonts::FontParams mSecParams;
         Animator mAnimator;
         std::mutex mGestureMutex;
 };

@@ -1,7 +1,7 @@
 #include <MenuForecast.h>
 #include "PngStorage.h"
 #include "Canvas.h"
-#include "main.h"
+#include "Config.h"
 #include <iostream>
 
 MenuForecast::MenuForecast(AbstractDisplayInterface &displayIface, IMenuInteraction *menuInterface)
@@ -39,20 +39,12 @@ void MenuForecast::drawRefreshItem()
     std::string tmp_str = "/usr/share/wlanclock/images/refresh.png";
     mFgCanvas->clear();
     PngStorage::getInstance().getCanvas(tmp_str.c_str())->copyTo(*mFgCanvas, 3, 0);
-    mFgCanvas->drawText(
-            36, // mSecParams.base_x,
-            13, // mSecParams.base_y,
-            0,  // mSecParams.index,
-            12, // mSecParams.size_h,
-            12, //mSecParams.size_v,
-            line1, 0xFF800000);
-    mFgCanvas->drawText(
-            36, // mSecParams.base_x,
-            26, // mSecParams.base_y,
-            0,  // mSecParams.index,
-            12, // mSecParams.size_h,
-            12, //mSecParams.size_v,
-            line2, 0xFF800000);
+    Config::Fonts::Params params;
+    params = Config::Fonts::PARAMS[Config::Fonts::FONT_WEATHER];
+    params.base_y = 13;
+    mFgCanvas->drawText(params, line1, 0xFF800000);
+    params.base_y = 26;
+    mFgCanvas->drawText(params, line2, 0xFF800000);
 }
 
 void MenuForecast::drawForecastItem()
@@ -80,27 +72,14 @@ void MenuForecast::drawForecastItem()
     tmp_str.append(".png");
     mFgCanvas->clear();
     PngStorage::getInstance().getCanvas(tmp_str.c_str())->copyTo(*mFgCanvas, 3, 0);
-    mFgCanvas->drawText(
-            36, // mSecParams.base_x,
-            10, // mSecParams.base_y,
-            0,  // mSecParams.index,
-            12, // mSecParams.size_h,
-            12, //mSecParams.size_v,
-            line1, 0xFF500000);
-    mFgCanvas->drawText(
-            36, // mSecParams.base_x,
-            20, // mSecParams.base_y,
-            0,  // mSecParams.index,
-            12, // mSecParams.size_h,
-            12, //mSecParams.size_v,
-            line2, 0xFF700000);
-    mFgCanvas->drawText(
-            36, // mSecParams.base_x,
-            30, // mSecParams.base_y,
-            0,  // mSecParams.index,
-            12, // mSecParams.size_h,
-            12, //mSecParams.size_v,
-            line3, 0xC0A00000);
+    Config::Fonts::Params params;
+    params = Config::Fonts::PARAMS[Config::Fonts::FONT_WEATHER];
+    params.base_y = 10;
+    mFgCanvas->drawText(params, line1, 0xFF500000);
+    params.base_y = 20;
+    mFgCanvas->drawText(params, line2, 0xFF700000);
+    params.base_y = 30;
+    mFgCanvas->drawText(params, line3, 0xC0A00000);
 }
 
 void MenuForecast::onGesture(IGestureReceiver::Gesture gesture)

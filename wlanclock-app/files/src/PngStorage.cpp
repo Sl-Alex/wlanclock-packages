@@ -16,7 +16,7 @@
 
 #include "PngStorage.h"
 #include "Canvas.h"
-#include "main.h"
+#include "Config.h"
 #include <iostream>
 
 

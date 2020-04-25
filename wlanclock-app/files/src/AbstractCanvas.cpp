@@ -100,16 +100,16 @@ void AbstractCanvas::drawRect(int x1, int y1, int x2, int y2, rgba32_t value)
     drawLine(x1,y2, x2,y2, value);
 }
 
-int AbstractCanvas::drawText(int x1, int y1, int fontIndex, int size_h, int size_v, std::string text, rgba32_t color)
+int AbstractCanvas::drawText(Config::Fonts::Params params, std::string text, rgba32_t color)
 {
     std::wstring wtext(text.begin(), text.end());
-    return drawText(x1, y1, fontIndex, size_h, size_v, wtext, color);
+    return drawText(params, wtext, color);
 }
 
-int AbstractCanvas::drawText(int x1, int y1, int fontIndex, int size_h, int size_v, std::wstring text, rgba32_t color)
+int AbstractCanvas::drawText(Config::Fonts::Params params, std::wstring text, rgba32_t color)
 {
-    FT_Face face = Fonts::getInstance().getFontFace(fontIndex);
-    FT_Set_Pixel_Sizes(face, size_h, size_v);
+    FT_Face face = Fonts::getInstance().getFontFace(params.index);
+    FT_Set_Pixel_Sizes(face, params.size_h, params.size_v);
     int off_x = 0;
     int off_y = 0;
     for (size_t i = 0; i < text.length(); i++)
@@ -136,7 +136,7 @@ int AbstractCanvas::drawText(int x1, int y1, int fontIndex, int size_h, int size
         {
             for (unsigned int x = 0; x < face->glyph->bitmap.width; x++)
             {
-                setPixel(x1 + x + off_x + horiBearX, y1 + y - off_y, (color & 0xFFFFFF00) | *pdata);
+                setPixel(params.base_x + x + off_x + horiBearX, params.base_y + y - off_y, (color & 0xFFFFFF00) | *pdata);
                 pdata++;
             }
         }

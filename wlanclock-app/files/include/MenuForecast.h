@@ -6,6 +6,7 @@
 #include "SysTimer.h"
 #include "UbusServer.h"
 #include "Fonts.h"
+#include "Config.h"
 #include "Animator.h"
 #include "Weather.h"
 #include "Menu.h"
@@ -29,8 +30,6 @@ class MenuForecast: public ISysTimer, public IGestureReceiver, public IMenuInter
         AbstractCanvas *mBgCanvas;
         AbstractCanvas *mFgCanvas;
         AbstractDisplayInterface & mDisplayInterface;
-        Fonts::FontParams mHourMinParams;
-        Fonts::FontParams mSecParams;
         Animator mAnimator;
         std::mutex mGestureMutex;
         std::vector<Weather::WeatherInfo> mWeatherForecast;
