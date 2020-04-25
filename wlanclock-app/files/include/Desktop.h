@@ -1,14 +1,17 @@
 #ifndef DEKSTOP_H
 #define DEKSTOP_H
 
+#include "MenuForecast.h"
+#include "MenuLocalStatus.h"
 #include "AbstractCanvas.h"
 #include "AbstractDisplayInterface.h"
 #include "SysTimer.h"
 #include "UbusServer.h"
 #include "Fonts.h"
 #include "Animator.h"
+#include <mutex>
 
-class Desktop: public ISysTimer, public IGestureReceiver
+class Desktop: public ISysTimer, public IGestureReceiver, public IMenuInteraction
 {
     public:
         Desktop(AbstractDisplayInterface &displayIface);
@@ -17,22 +20,27 @@ class Desktop: public ISysTimer, public IGestureReceiver
         int init(void);
 
     private:
+        void drawDesktop();
         void onTimer();
-        void onGesture(uint32_t gesture);
-
-        static constexpr int DESKTOP_WIDTH     = 128;
-        static constexpr int DESKTOP_HEIGHT    = 32;
+        void onGesture(Gesture gesture);
+        void onMenuAction(IMenuInteraction::MenuAction action);
 
         const std::string FONT_HOURS_MINS = "HOURS_MINS";
         const std::string FONT_SECONDS    = "SECONDS";
 
-        AbstractCanvas *mDestCanvas;
         AbstractCanvas *mBgCanvas;
         AbstractCanvas *mFgCanvas;
         AbstractDisplayInterface & mDisplayInterface;
         Fonts::FontParams mHourMinParams;
         Fonts::FontParams mSecParams;
         Animator mAnimator;
+        Gesture mLastGesture;
+        rgba32_t mColor;
+        tm mTm;
+
+        MenuForecast *mMenuForecast;
+        MenuLocalStatus *mMenuLocalStatus;
+        std::mutex mGestureMutex;
 };
 
 #endif /* DESKTOP_H */

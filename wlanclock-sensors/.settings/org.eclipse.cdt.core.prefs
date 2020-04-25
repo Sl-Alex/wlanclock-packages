@@ -1,0 +1,11 @@
+eclipse.preferences.version=1
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1012685167/STAGING_DIR/delimiter=\:
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1012685167/STAGING_DIR/operation=append
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1012685167/STAGING_DIR/value=${ProjDirPath}/../../../staging_dir
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1012685167/append=true
+environment/project/cdt.managedbuild.config.gnu.cross.exe.debug.1012685167/appendContributed=true
+environment/project/cdt.managedbuild.config.gnu.cross.exe.release.1156895293/STAGING_DIR/delimiter=\:
+environment/project/cdt.managedbuild.config.gnu.cross.exe.release.1156895293/STAGING_DIR/operation=append
+environment/project/cdt.managedbuild.config.gnu.cross.exe.release.1156895293/STAGING_DIR/value=${ProjDirPath}/../../../staging_dir
+environment/project/cdt.managedbuild.config.gnu.cross.exe.release.1156895293/append=true
+environment/project/cdt.managedbuild.config.gnu.cross.exe.release.1156895293/appendContributed=true

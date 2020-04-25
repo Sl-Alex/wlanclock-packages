@@ -2,7 +2,7 @@ include $(TOPDIR)/rules.mk
 
 # Name, version and release number
 # The name and version of your package are used to define the variable to point to the build directory of your package: $(PKG_BUILD_DIR)
-PKG_NAME:=wlanclock-fonts
+PKG_NAME:=wlanclock-assets
 PKG_VERSION:=0.1
 PKG_RELEASE:=1
 
@@ -14,14 +14,14 @@ include $(INCLUDE_DIR)/package.mk
 define Package/$(PKG_NAME)
 	SECTION:=wlanclock
 	CATEGORY:=wlanclock
-	SUBMENU:=Utilities
+	SUBMENU:=Assets
 	DEPENDS:=
-	TITLE:=WlanClock fonts collection
+	TITLE:=WlanClock assets (fonts, images)
 endef
 
 # Package description; a more verbose description on what our package does
 define Package/$(PKG_NAME)/description
-	WlanClock fonts collection
+	WlanClock assets (fonts, images)
 endef
 
 # Package preparation instructions; create the build directory and copy the source code. 
@@ -36,8 +36,10 @@ endef
 
 # Package install instructions; create a directory inside the package to hold our executable, and then copy the executable we built previously into the folder
 define Package/$(PKG_NAME)/install
-	$(INSTALL_DIR) $(1)/usr/share/fonts/wlanclock
-	cp -r $(FILES_DIR)/*.ttf $(1)/usr/share/fonts/wlanclock
+	$(INSTALL_DIR) $(1)/usr/share/wlanclock/images
+	$(INSTALL_DIR) $(1)/usr/share/wlanclock/fonts
+	cp -r $(FILES_DIR)/fonts/*.ttf $(1)/usr/share/wlanclock/fonts
+	cp -r $(FILES_DIR)/images/* $(1)/usr/share/wlanclock/images
 endef
 
 # This command is always the last, it uses the definitions and variables we give above in order to get the job done

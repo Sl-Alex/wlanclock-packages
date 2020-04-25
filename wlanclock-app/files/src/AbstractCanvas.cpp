@@ -102,6 +102,12 @@ void AbstractCanvas::drawRect(int x1, int y1, int x2, int y2, rgba32_t value)
 
 int AbstractCanvas::drawText(int x1, int y1, int fontIndex, int size_h, int size_v, std::string text, rgba32_t color)
 {
+    std::wstring wtext(text.begin(), text.end());
+    return drawText(x1, y1, fontIndex, size_h, size_v, wtext, color);
+}
+
+int AbstractCanvas::drawText(int x1, int y1, int fontIndex, int size_h, int size_v, std::wstring text, rgba32_t color)
+{
     FT_Face face = Fonts::getInstance().getFontFace(fontIndex);
     FT_Set_Pixel_Sizes(face, size_h, size_v);
     int off_x = 0;
@@ -138,4 +144,20 @@ int AbstractCanvas::drawText(int x1, int y1, int fontIndex, int size_h, int size
     }
 
     return 0;
+}
+
+void AbstractCanvas::copyAreaTo(Area area, AbstractCanvas &canvas, int to_x, int to_y)
+{
+    for (int y = area.y1; y <= area.y2; y++)
+    {
+        for (int x = area.x1; x <= area.x2; x++)
+        {
+            canvas.setPixelRaw(to_x + x - area.x1, to_y + y - area.y1, getPixelRaw(x,y));
+        }
+    }
+}
+
+void AbstractCanvas::copyTo(AbstractCanvas &canvas, int to_x, int to_y)
+{
+    copyAreaTo((Area){.x1 = 0, .y1 = 0, .x2 = mWidth - 1, .y2 = mHeight - 1}, canvas, to_x, to_y);
 }

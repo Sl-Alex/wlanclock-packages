@@ -30,7 +30,7 @@ all: info $(TARGET)
 $(TARGET): $(OBJECTS_C) $(OBJECTS_CPP)
 	@mkdir -p $(BINDIR)
 	@echo " Linking..."
-	$(CXX) $^ $(CFLAGS) $(LDFLAGS) -lubox -lubus -luci -lfreetype -o $(TARGET)
+	$(CXX) $^ $(CFLAGS) $(LDFLAGS) -lubox -lubus -luci -lfreetype -lbz2 -lpng16 -lz -ljson-c -lcurl -lssl -lcrypto -lmbedtls -lmbedx509 -lmbedcrypto -o $(TARGET)
 
 # generic: build any object file required
 $(BUILDDIR)/%.o: $(SRCDIR)/%.$(SRCEXT_C)

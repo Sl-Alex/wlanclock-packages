@@ -28,6 +28,12 @@ void Animator::start()
     {
         memcpy(pBackground->getData(), pDest->getData(), pBackground->getSize());
     }
+    if (mAnimType == ANIM_TYPE_SLIDE_BG)
+    {
+        /* Foreground goes to back, dest goes to front */
+        memcpy(pBackground->getData(), pForeground->getData(), pBackground->getSize());
+        memcpy(pForeground->getData(), pDest->getData(),       pForeground->getSize());
+    }
     mRunning = true;
 }
 
@@ -63,6 +69,67 @@ bool Animator::tick()
                 mTick+=20;
                 if(mTick >255)
                     mTick = 255;
+            }
+            break;
+        case ANIM_TYPE_SLIDE_BG:
+            /* Step 1. Update offset according to direction */
+            switch(mAnimDir)
+            {
+                case ANIM_DIR_UP:
+                    mYfg += mSpeed;
+                    if (mYfg > 0) mYfg = 0;
+                    break;
+                case ANIM_DIR_DOWN:
+                    mYfg -= mSpeed;
+                    if (mYfg < 0) mYfg = 0;
+                    break;
+                case ANIM_DIR_LEFT:
+                    mXfg += mSpeed;
+                    if (mXfg > 0) mXfg = 0;
+                    break;
+                case ANIM_DIR_RIGHT:
+                    mXfg -= mSpeed;
+                    if (mXfg < 0) mXfg = 0;
+                    break;
+                default:
+                    std::cerr << "Animation dir not implemented: " << mAnimDir << std::endl;
+                    mRunning = false;
+            }
+            /* Step 2. Update pDest */
+            for (int y = mArea.y1; y <= mArea.y2; y++)
+            {
+                for (int x = mArea.x1; x <= mArea.x2; x++)
+                {
+                    uint32_t pix;
+                    if ((x + mXfg < 0) || (x + mXfg >= width) || (y + mYfg < 0) || (y + mYfg >= height))
+                    {
+                        switch(mAnimDir)
+                        {
+                            case ANIM_DIR_DOWN:
+                                pix = pForeground->getPixelRaw(x,y-height+mYfg);
+                                break;
+                            case ANIM_DIR_UP:
+                                pix = pForeground->getPixelRaw(x,y+height+mYfg);
+                                break;
+                            case ANIM_DIR_RIGHT:
+                                pix = pForeground->getPixelRaw(x-width+mXfg,y);
+                                break;
+                            case ANIM_DIR_LEFT:
+                                pix = pForeground->getPixelRaw(x+width+mXfg,y);
+                                break;
+                        }
+                        pDest->setPixelRaw(x,y,pix);
+                    }
+                    else
+                    {
+                        pix = pBackground->getPixelRaw(x,y);
+                        pDest->setPixelRaw(x,y,pix);
+                    }
+                }
+            }
+            if ((mXfg == 0) && (mYfg == 0))
+            {
+                mRunning = false;
             }
             break;
         /* Intentional fall-through */
@@ -115,12 +182,6 @@ bool Animator::tick()
                                 case ANIM_DIR_LEFT:
                                     pix = pBackground->getPixelRaw(x+width+mXfg,y);
                                     break;
-                            }
-                            if ((mAnimDir == ANIM_DIR_DOWN))
-                            {
-                            }
-                            if ((mAnimDir == ANIM_DIR_LEFT) || (mAnimDir == ANIM_DIR_RIGHT))
-                            {
                             }
                             pDest->setPixelRaw(x,y,pix);
                         }

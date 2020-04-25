@@ -31,7 +31,7 @@ static void result_handler(struct ubus_request *req, int type, struct blob_attr 
         free(strmsg); /* need to free strmsg */
 }
 
-void ubus_client_send(uint32_t brightness, float pressure, float humidity, float temperature)
+void ubus_client_send(uint32_t gesture)
 {
     int ret;
     uint32_t host_id;
@@ -69,10 +69,7 @@ void ubus_client_send(uint32_t brightness, float pressure, float humidity, float
 
     /* 6. prepare request method policy and data */
     blob_buf_init(&bb,0);
-    blobmsg_add_u32   (&bb, "brightness",  brightness );
-    blobmsg_add_double(&bb, "pressure",    pressure   );
-    blobmsg_add_double(&bb, "humidity",    humidity   );
-    blobmsg_add_double(&bb, "temperature", temperature);
+    blobmsg_add_u32   (&bb, "gesture",  gesture );
 
     /* 7. call the ubus host object */
     ret=ubus_invoke(ctx, host_id, "data", bb.head, result_handler, 0, 500);

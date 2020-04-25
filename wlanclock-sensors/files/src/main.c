@@ -46,7 +46,7 @@ int main(void)
 
         if (rc_bme280 != 0)
         {
-            fprintf(stderr, "Failed to get data (code %+d).\n", rc);
+            fprintf(stderr, "Failed to get temp/hum/pres data (code %+d).\n", rc);
         }
 
         if (!rc_bh1750  && !rc_bme280)

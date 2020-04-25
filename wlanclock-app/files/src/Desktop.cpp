@@ -1,17 +1,21 @@
 #include "Desktop.h"
 #include "Canvas.h"
+#include "main.h"
+#include <iostream>
 
 Desktop::Desktop(AbstractDisplayInterface &displayIface)
     : mDisplayInterface(displayIface)
+    , mMenuForecast(nullptr)
 {
-    mDestCanvas = new Canvas<CANVAS_COLOR_4BIT>(DESKTOP_WIDTH, DESKTOP_HEIGHT);
-    mBgCanvas   = new Canvas<CANVAS_COLOR_4BIT>(DESKTOP_WIDTH, DESKTOP_HEIGHT);
-    mFgCanvas   = new Canvas<CANVAS_COLOR_4BIT>(DESKTOP_WIDTH, DESKTOP_HEIGHT);
+    SysTimer::getInstance().subscribe(*this, Config::Display::UPDATE_INTERVAL, true);
+    mBgCanvas   = new Canvas<CANVAS_COLOR_4BIT>(Config::Display::WIDTH, Config::Display::HEIGHT);
+    mFgCanvas   = new Canvas<CANVAS_COLOR_4BIT>(Config::Display::WIDTH, Config::Display::HEIGHT);
+    UbusServer::getInstance().subscribeGesture(*this);
 }
 
 Desktop::~Desktop()
 {
-    delete mDestCanvas;
+    UbusServer::getInstance().unsubscribeGesture();
     delete mBgCanvas;
     delete mFgCanvas;
 }
@@ -24,42 +28,43 @@ int Desktop::init()
     return rc;
 }
 
+void Desktop::drawDesktop()
+{
+    char buff[100];
+    snprintf(buff, sizeof(buff), "%02d:%02d", mTm.tm_hour, mTm.tm_min);
+    mFgCanvas->clear();
+    mFgCanvas->drawText(
+            mHourMinParams.base_x,
+            mHourMinParams.base_y,
+            mHourMinParams.index,
+            mHourMinParams.size_h,
+            mHourMinParams.size_v,
+            std::string(buff), mColor);
+    snprintf(buff, sizeof(buff), "%02d", mTm.tm_sec);
+    mFgCanvas->drawText(
+            mSecParams.base_x,
+            mSecParams.base_y,
+            mSecParams.index,
+            mSecParams.size_h,
+            mSecParams.size_v,
+            std::string(buff), mColor);
+}
+
 void Desktop::onTimer()
 {
+    std::lock_guard<std::mutex> lock(mGestureMutex);
     static uint8_t r = 255;
     static uint8_t g = 0;
     static uint8_t b = 0;
     static uint8_t step = 0;
-    static struct tm old_stm;
     time_t t = time(NULL);
-    struct tm stm = *localtime(&t);
-    if (memcmp(&stm, &old_stm, sizeof(stm)))
+    tm newTm = *localtime(&t);
+    if (!mAnimator.isRunning() && memcmp(&newTm, &mTm, sizeof(mTm)))
     {
-        memcpy(&old_stm, &stm, sizeof(stm));
-        if (mAnimator.isRunning())
-        {
-            mAnimator.finish();
-        }
-        char buff[100];
-        snprintf(buff, sizeof(buff), "%02d:%02d", stm.tm_hour, stm.tm_min);
-        rgba32_t color = ((uint32_t)r << 24) | ((uint32_t)g << 16) | ((uint32_t)b << 8);
-        mFgCanvas->clear();
-        mFgCanvas->drawText(
-                mHourMinParams.base_x,
-                mHourMinParams.base_y,
-                mHourMinParams.index,
-                mHourMinParams.size_h,
-                mHourMinParams.size_v,
-                std::string(buff), color);
-        snprintf(buff, sizeof(buff), "%02d", stm.tm_sec);
-        mFgCanvas->drawText(
-                mSecParams.base_x,
-                mSecParams.base_y,
-                mSecParams.index,
-                mSecParams.size_h,
-                mSecParams.size_v,
-                std::string(buff), color);
-        mAnimator.setFgBgDest(*mFgCanvas, *mBgCanvas, *mDestCanvas);
+        memcpy(&mTm, &newTm, sizeof(mTm));
+        mColor = ((uint32_t)r << 24) | ((uint32_t)g << 16) | ((uint32_t)b << 8);
+        drawDesktop();
+        mAnimator.setFgBgDest(*mFgCanvas, *mBgCanvas, *mDisplayInterface.getCanvas());
         mAnimator.setDir(Animator::ANIM_DIR_DOWN);
         mAnimator.setSpeed(10);
         mAnimator.setType(Animator::ANIM_TYPE_OPACITY);
@@ -68,7 +73,7 @@ void Desktop::onTimer()
     if (mAnimator.isRunning())
     {
         mAnimator.tick();
-        mDisplayInterface.update(*mDestCanvas);
+        mDisplayInterface.update();
     }
     switch(step)
     {
@@ -99,6 +104,66 @@ void Desktop::onTimer()
     }
 }
 
-void Desktop::onGesture(uint32_t gesture)
+void Desktop::onGesture(Gesture gesture)
 {
+    std::lock_guard<std::mutex> lock(mGestureMutex);
+    mLastGesture = gesture;
+    switch(gesture)
+    {
+        case GESTURE_UP:
+            mAnimator.finish();
+            SysTimer::getInstance().unsubscribe(*this);
+            UbusServer::getInstance().unsubscribeGesture();
+            mMenuForecast = new MenuForecast(mDisplayInterface, this);
+            break;
+        case GESTURE_DOWN:
+            mAnimator.finish();
+            SysTimer::getInstance().unsubscribe(*this);
+            UbusServer::getInstance().unsubscribeGesture();
+            mMenuLocalStatus = new MenuLocalStatus(mDisplayInterface, this);
+            break;
+        default:
+            break;
+    }
+}
+
+void Desktop::onMenuAction(IMenuInteraction::MenuAction action)
+{
+    if (action == MENUACTION_EXIT)
+    {
+        /* Re-subscribe to what we need */
+        SysTimer::getInstance().subscribe(*this, Config::Display::UPDATE_INTERVAL, true);
+        UbusServer::getInstance().subscribeGesture(*this);
+        /* Get current time */
+        time_t t = time(NULL);
+        mTm = *localtime(&t);
+        /* Draw it */
+        drawDesktop();
+        /* Set common animation parameters */
+        mAnimator.setFgBgDest(*mFgCanvas, *mBgCanvas, *mDisplayInterface.getCanvas());
+        mAnimator.setType(Animator::ANIM_TYPE_SLIDE_BG);
+        mAnimator.setSpeed(2);
+        switch (mLastGesture)
+        {
+            case GESTURE_UP:
+                delete mMenuForecast;
+                mAnimator.setDir(Animator::ANIM_DIR_DOWN);
+                break;
+            case GESTURE_DOWN:
+                delete mMenuLocalStatus;
+                mAnimator.setDir(Animator::ANIM_DIR_UP);
+                break;
+            case GESTURE_LEFT:
+                mAnimator.setDir(Animator::ANIM_DIR_RIGHT);
+                break;
+            case GESTURE_RIGHT:
+                mAnimator.setDir(Animator::ANIM_DIR_LEFT);
+                break;
+            default:
+                break;
+        }
+        mAnimator.start();
+        mAnimator.tick();
+        mDisplayInterface.update();
+    }
 }

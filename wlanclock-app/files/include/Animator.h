@@ -11,6 +11,7 @@ public:
     typedef enum {
         ANIM_TYPE_OPACITY,  /* Increase FG opacity */
         ANIM_TYPE_SLIDE,    /* Slide FG over BG */
+        ANIM_TYPE_SLIDE_BG, /* Slide BG over FG */
         ANIM_TYPE_SHIFT     /* Shift FG in while shifting BG out */
     } AnimType;
 

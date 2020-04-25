@@ -14,6 +14,7 @@
 #include <time.h>
 
 #include "evdev.h"
+#include "ubus_client.h"
 
 static volatile int timer_expired = 0;
 static int dx = 0;
@@ -108,10 +109,18 @@ void parse_gesture(int dx, int dy, int btn)
     else if ((adx > thr) && (((float)adx/(float)ady) > prop))
     {
         printf("%s %s\n", dbtn ? "Drag" : "Swipe", (dx > 0) ? "right" : "left");
+        if (dbtn == 0)
+        {
+            ubus_client_send((dx > 0) ? 1 : 0);
+        }
     }
     else if ((ady > thr) && (((float)ady/(float)adx) > prop))
     {
         printf("%s %s\n", dbtn ? "Drag" : "Swipe", (dy > 0) ? "down" : "up");
+        if (dbtn == 0)
+        {
+            ubus_client_send((dy > 0) ? 3 : 2);
+        }
     }
     else
     {

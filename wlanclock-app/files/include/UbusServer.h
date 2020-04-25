@@ -6,8 +6,16 @@
 class IGestureReceiver
 {
   public:
+    typedef enum
+    {
+        GESTURE_LEFT  = 0,
+        GESTURE_RIGHT = 1,
+        GESTURE_UP    = 2,
+        GESTURE_DOWN  = 3,
+        GESTURE_CLICK = 4
+    } Gesture;
     virtual ~IGestureReceiver() {};
-    virtual void onGesture(uint32_t gesture) = 0;
+    virtual void onGesture(Gesture gesture) = 0;
 };
 
 class IBrightnessReceiver
@@ -45,17 +53,29 @@ class UbusServer
         UbusServer(UbusServer const&)  = delete;
         void operator=(UbusServer const&) = delete;
 
-        void registerReceiver(IGestureReceiver     &receiver)
+        void subscribeGesture(IGestureReceiver     &receiver)
         {
             fGestureReceiver = &receiver;
         }
-        void registerReceiver(IBrightnessReceiver  &receiver)
+        void unsubscribeGesture()
+        {
+            fGestureReceiver = nullptr;
+        }
+        void subscribeBrightness(IBrightnessReceiver  &receiver)
         {
             fBrightnessReceiver = &receiver;
         }
-        void registerReceiver(IPresHumTempReceiver &receiver)
+        void unsubscribeBrightness()
+        {
+            fBrightnessReceiver = nullptr;
+        }
+        void subscribePresHumTemp(IPresHumTempReceiver &receiver)
         {
             fPresHumTempReceiver = &receiver;
+        }
+        void unsubscribePresHumTemp()
+        {
+            fPresHumTempReceiver = nullptr;
         }
     private:
         UbusServer();

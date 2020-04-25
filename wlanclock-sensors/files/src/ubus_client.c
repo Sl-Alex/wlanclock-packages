@@ -19,17 +19,18 @@ static struct ubus_object wlanclock_obj=
 /* callback function for ubus_invoke to process result from the host
  * Here we just print out the message.
  */
+/*
 static void result_handler(struct ubus_request *req, int type, struct blob_attr *msg)
 {
-        char *strmsg;
+    char *strmsg;
 
-        if(!msg)
-                return;
+    if(!msg)
+        return;
 
-        strmsg=blobmsg_format_json_indent(msg,true, 0); /* 0 type of format */
-        printf("Response from the host: %s\n", strmsg);
-        free(strmsg); /* need to free strmsg */
+    strmsg=blobmsg_format_json_indent(msg,true, 0);
+    free(strmsg);
 }
+*/
 
 void ubus_client_send(uint32_t brightness, float pressure, float humidity, float temperature)
 {
@@ -75,8 +76,7 @@ void ubus_client_send(uint32_t brightness, float pressure, float humidity, float
     blobmsg_add_double(&bb, "temperature", temperature);
 
     /* 7. call the ubus host object */
-    ret=ubus_invoke(ctx, host_id, "data", bb.head, result_handler, 0, 500);
-    printf("Call result: %s\n", ubus_strerror(ret));
+    ret=ubus_invoke(ctx, host_id, "data", bb.head, NULL /*result_handler*/, 0, 500);
 
     uloop_done();
 

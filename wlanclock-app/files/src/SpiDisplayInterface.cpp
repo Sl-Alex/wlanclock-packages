@@ -2,6 +2,7 @@
 #include "gpio_ctrl.h"
 #include "spi_ctrl.h"
 #include "uci_reader.h"
+#include "Canvas.h"
 
 #include "unistd.h"
 #include <iostream>
@@ -27,12 +28,14 @@ SpiDisplayInterface::SpiDisplayInterface()
 
     mDisplayBuffer[0] = nullptr;
     mDisplayBuffer[1] = nullptr;
+    mDestCanvas = new Canvas<CANVAS_COLOR_4BIT>(Config::Display::WIDTH, Config::Display::HEIGHT);
 }
 
 SpiDisplayInterface::~SpiDisplayInterface()
 {
     delete[] mDisplayBuffer[0];
     delete[] mDisplayBuffer[1];
+    delete mDestCanvas;
 }
 
 void SpiDisplayInterface::spi_loop(void)
@@ -85,6 +88,11 @@ void SpiDisplayInterface::spi_loop(void)
             spi_write(mSpiFd, mDisplayBuffer[newDataIndex], mDisplayBufferSize);
         }
     }
+}
+
+AbstractCanvas *SpiDisplayInterface::getCanvas()
+{
+    return mDestCanvas;
 }
 
 int SpiDisplayInterface::start(void)
@@ -162,20 +170,20 @@ void SpiDisplayInterface::setBrightness(int brightness)
     mThreadCond.notify_one();
 }
 
-void SpiDisplayInterface::update(AbstractCanvas &canvas)
+void SpiDisplayInterface::update()
 {
     std::unique_lock<std::mutex> lock(mThreadMutex);
     if (mDisplayBuffer[mDisplayBufferIndex] == nullptr)
     {
-        mDisplayBuffer[mDisplayBufferIndex] = new char[canvas.getSize()];
-        mDisplayBufferSize = canvas.getSize();
+        mDisplayBuffer[mDisplayBufferIndex] = new char[mDestCanvas->getSize()];
+        mDisplayBufferSize = mDestCanvas->getSize();
     }
-    if (mDisplayBufferSize != canvas.getSize())
+    if (mDisplayBufferSize != mDestCanvas->getSize())
     {
         std::cerr << "mDisplayBufferSize != canvas.getSize()" << std::endl;
         return;
     }
-    memcpy(mDisplayBuffer[mDisplayBufferIndex], canvas.getData(), canvas.getSize());
+    memcpy(mDisplayBuffer[mDisplayBufferIndex], mDestCanvas->getData(), mDestCanvas->getSize());
     mNewDisplayData = true;
     mThreadCond.notify_one();
 }

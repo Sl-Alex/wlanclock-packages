@@ -3,6 +3,9 @@
 #include <iostream>
 
 UbusServer::UbusServer()
+    :fGestureReceiver(nullptr)
+    ,fBrightnessReceiver(nullptr)
+    ,fPresHumTempReceiver(nullptr)
 {
 }
 
@@ -34,7 +37,7 @@ bool UbusServer::isRunning(void)
 void UbusServer::uBusCbGesture(uint32_t gesture)
 {
     if (getInstance().fGestureReceiver)
-        getInstance().fGestureReceiver->onGesture(gesture);
+        getInstance().fGestureReceiver->onGesture((IGestureReceiver::Gesture)gesture);
 }
 
 void UbusServer::uBusCbBrightness(uint32_t brightness)

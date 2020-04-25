@@ -2,7 +2,7 @@
 #define SPIDISPLAYINTERFACE_H
 
 #include <string>
-
+#include "main.h"
 #include "AbstractDisplayInterface.h"
 #include "spi_ctrl.h"
 #include <mutex>
@@ -17,9 +17,10 @@ class SpiDisplayInterface : public AbstractDisplayInterface
 
         virtual int start(void);
         int stop(void);
+        virtual AbstractCanvas *getCanvas();
 
         virtual void setBrightness(int brightness);
-        virtual void update(AbstractCanvas &cavas);
+        virtual void update();
 
     private:
 
@@ -40,6 +41,7 @@ class SpiDisplayInterface : public AbstractDisplayInterface
         std::thread *mThread;
 
         char *mDisplayBuffer[2];
+        AbstractCanvas *mDestCanvas;
         int  mDisplayBufferSize;
         int mDisplayBufferIndex;
         bool mNewBrightness;

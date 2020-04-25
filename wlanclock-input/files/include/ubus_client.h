@@ -8,7 +8,7 @@ extern "C" {
 
 #include <stdint.h>
 
-void ubus_client_send(uint32_t brightness, float pressure, float humidity, float temperature);
+void ubus_client_send(uint32_t gesture);
 
 #ifdef __cplusplus
 }

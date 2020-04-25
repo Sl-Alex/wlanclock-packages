@@ -91,30 +91,23 @@ static int wlanclock_data_handler( struct ubus_context *ctx, struct ubus_object 
     /* Parse blob_msg from the caller to request policy */
     blobmsg_parse(wlanclock_data_policy, ARRAY_SIZE(wlanclock_data_policy), tb, blob_data(msg), blob_len(msg));
 
-    /* print request msg */
-    printf("Receive msg from caller:\n");
     if(tb[WLANCLOCK_DATA_GESTURE])
     {
         uint32_t gesture = blobmsg_get_u32   (tb[WLANCLOCK_DATA_GESTURE]);
         if (cb_gesture)
             cb_gesture(gesture);
-        printf("   Gesture     = %u\n",   gesture);
     }
     if(tb[WLANCLOCK_DATA_BRIGHTNESS])
     {
         uint32_t brightness = blobmsg_get_u32   (tb[WLANCLOCK_DATA_BRIGHTNESS]);
         if (cb_brightness)
             cb_brightness(brightness);
-        printf("   Brightness  = %u\n",   brightness);
     }
     if(tb[WLANCLOCK_DATA_PRESSURE] && tb[WLANCLOCK_DATA_HUMIDITY] && tb[WLANCLOCK_DATA_TEMPERATURE])
     {
         double pressure = blobmsg_get_double(tb[WLANCLOCK_DATA_PRESSURE]);
         double humidity = blobmsg_get_double(tb[WLANCLOCK_DATA_HUMIDITY]);
         double temperature = blobmsg_get_double(tb[WLANCLOCK_DATA_TEMPERATURE]);
-        printf("   Pressure    = %.2f\n", pressure);
-        printf("   Humidity    = %.2f\n", humidity);
-        printf("   Temperature = %.2f\n", temperature);
         if (cb_pres_hum_temp)
             cb_pres_hum_temp(pressure, humidity, temperature);
     }

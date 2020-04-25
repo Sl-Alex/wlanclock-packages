@@ -19,49 +19,58 @@
 #include "SysTimer.h"
 #include "Desktop.h"
 #include "Fonts.h"
+#include "PngStorage.h"
+#include "Weather.h"
+#include "BrightnessController.h"
+#include "PresHumTempController.h"
 
-/* TODO: delete this debug stuff */
-class BrightnessReceiver: public IBrightnessReceiver
-{
-    public:
-        void onBrightness(uint32_t brightness){mBrightness = brightness; newBrightness = true;}
-        uint32_t getBrightness(void) {newBrightness = false; return mBrightness; }
-        bool getNewBrightness(void){return newBrightness;}
-    private:
-        uint32_t mBrightness;
-        bool newBrightness = false;
-
-};
- 
 int main(void)
 {
     SpiDisplayInterface displayInterface;
-    BrightnessReceiver brigthness_receiver;
     Fonts::getInstance().init();
+
+    /* Initialize weather service and schedule the very first weather update */
+    Weather::getInstance();
+    /* Initialize pressure/humidity/temperature controller */
+    PresHumTempController::getInstance();
 
     displayInterface.start();
     displayInterface.setBrightness(0);
+    BrightnessController::getInstance().setDisplayInterface(&displayInterface);
 
     Desktop desktop(displayInterface);
     desktop.init();
 
-
-    UbusServer::getInstance().registerReceiver(brigthness_receiver);
+    PngStorage::getInstance().init();
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/refresh.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/house.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/01d.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/01n.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/02d.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/02n.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/03d.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/03n.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/04d.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/04n.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/09d.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/09n.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/10d.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/10n.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/11d.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/11n.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/13d.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/13n.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/50d.png");
+    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/50n.png");
 
     if (0 != UbusServer::getInstance().start())
     {
         exit(1);
     }
 
-    SysTimer::getInstance().subscribe(desktop, 10, true);
     while(UbusServer::getInstance().isRunning())
     {
         SysTimer::getInstance().waitAndProcess();
-
-        if (brigthness_receiver.getNewBrightness())
-        {
-            displayInterface.setBrightness((int)brigthness_receiver.getBrightness());
-        }
     }
 
     UbusServer::getInstance().stop();
