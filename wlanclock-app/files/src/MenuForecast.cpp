@@ -9,8 +9,6 @@ MenuForecast::MenuForecast(AbstractDisplayInterface &displayIface, IMenuInteract
     ,mDisplayInterface(displayIface)
     ,mForecastItemIndex(0)
 {
-    UbusServer::getInstance().subscribeGesture(*this);
-    SysTimer::getInstance().subscribe(*this, Config::Display::UPDATE_INTERVAL, true);
     mWeatherForecast = Weather::getInstance().getWeatherForecast();
     mBgCanvas   = new Canvas<CANVAS_COLOR_4BIT>(Config::Display::WIDTH, Config::Display::HEIGHT);
     mFgCanvas   = new Canvas<CANVAS_COLOR_4BIT>(Config::Display::WIDTH, Config::Display::HEIGHT);
@@ -29,6 +27,8 @@ MenuForecast::MenuForecast(AbstractDisplayInterface &displayIface, IMenuInteract
     mAnimator.setSpeed(2);
     mAnimator.start();
     mAnimator.tick();
+    UbusServer::getInstance().subscribeGesture(*this);
+    SysTimer::getInstance().subscribe(*this, Config::Display::UPDATE_INTERVAL, true);
 }
 
 void MenuForecast::drawRefreshItem()
@@ -36,9 +36,8 @@ void MenuForecast::drawRefreshItem()
     std::string line1 = "not yet available";
     std::string line2 = " please try later";
 
-    std::string tmp_str = "/usr/share/wlanclock/images/refresh.png";
     mFgCanvas->clear();
-    PngStorage::getInstance().getCanvas(tmp_str.c_str())->copyTo(*mFgCanvas, 3, 0);
+    PngStorage::getInstance().getCanvas("refresh.png")->copyTo(*mFgCanvas, 3, 0);
     Config::Fonts::Params params;
     params = Config::Fonts::PARAMS[Config::Fonts::FONT_WEATHER];
     params.base_y = 13;
@@ -64,10 +63,27 @@ void MenuForecast::drawForecastItem()
     sprintf(tmp, " %d%% %dm/s", (int)mWeatherForecast[mForecastItemIndex].humidity, (int)mWeatherForecast[mForecastItemIndex].wind_speed);
     tmp_str = tmp;
     line2.append(tmp_str.begin(), tmp_str.end());
-    /* TODO: Show rain/snow volume or something else */
-    line3.append(L"one more string!");
+    if ((mWeatherForecast[mForecastItemIndex].rain + mWeatherForecast[mForecastItemIndex].snow)< 0.1f)
+    {
+        if ((int)mWeatherForecast[mForecastItemIndex].clouds == 0)
+        {
+            line3.append(L"clear sky");
+        }
+        else
+        {
+            sprintf(tmp, "clouds: %d%%", (int)mWeatherForecast[mForecastItemIndex].clouds);
+            tmp_str = tmp;
+            line3.append(tmp_str.begin(), tmp_str.end());
+        }
+    }
+    else
+    {
+        sprintf(tmp, "prec.: %.1fmm", mWeatherForecast[mForecastItemIndex].rain + mWeatherForecast[mForecastItemIndex].snow);
+        tmp_str = tmp;
+        line3.append(tmp_str.begin(), tmp_str.end());
+    }
 
-    tmp_str = "/usr/share/wlanclock/images/weather/";
+    tmp_str = "weather/";
     tmp_str.append(mWeatherForecast[mForecastItemIndex].weatherIcon);
     tmp_str.append(".png");
     mFgCanvas->clear();
@@ -84,8 +100,9 @@ void MenuForecast::drawForecastItem()
 
 void MenuForecast::onGesture(IGestureReceiver::Gesture gesture)
 {
-    std::lock_guard<std::mutex> lock(mGestureMutex);
     mAnimator.finish();
+    mDisplayInterface.update();
+    SysTimer::getInstance().subscribe(*this, Config::Display::MENU_TIMEOUT, false);
     switch(gesture)
     {
         case GESTURE_UP:
@@ -104,6 +121,7 @@ void MenuForecast::onGesture(IGestureReceiver::Gesture gesture)
             mAnimator.setType(Animator::ANIM_TYPE_SHIFT);
             mAnimator.start();
             mAnimator.tick();
+            SysTimer::getInstance().subscribe(*this, Config::Display::UPDATE_INTERVAL, true);
             return;
         case GESTURE_DOWN:
             if (mForecastItemIndex > 0)
@@ -114,11 +132,12 @@ void MenuForecast::onGesture(IGestureReceiver::Gesture gesture)
                 mAnimator.setType(Animator::ANIM_TYPE_SHIFT);
                 mAnimator.start();
                 mAnimator.tick();
+                SysTimer::getInstance().subscribe(*this, Config::Display::UPDATE_INTERVAL, true);
                 return;
             }
             break;
         default:
-            return;
+            break;
     }
 
     SysTimer::getInstance().unsubscribe(*this);
@@ -129,19 +148,34 @@ void MenuForecast::onGesture(IGestureReceiver::Gesture gesture)
 
     /* This is the very last step, we will be destroyed here */
     if (mMenuInterface)
-        mMenuInterface->onMenuAction(MENUACTION_EXIT);
+        mMenuInterface->onMenuAction(MENUACTION_EXIT, gesture);
 }
 
-void MenuForecast::onMenuAction(IMenuInteraction::MenuAction action)
+void MenuForecast::onMenuAction(IMenuInteraction::MenuAction action, IGestureReceiver::Gesture gesture)
 {
 }
 
 void MenuForecast::onTimer()
 {
-    std::lock_guard<std::mutex> lock(mGestureMutex);
     if (mAnimator.isRunning())
     {
         mAnimator.tick();
         mDisplayInterface.update();
+        if (!mAnimator.isRunning())
+        {
+            SysTimer::getInstance().subscribe(*this, Config::Display::MENU_TIMEOUT, false);
+        }
+    }
+    else
+    {
+        SysTimer::getInstance().unsubscribe(*this);
+        UbusServer::getInstance().unsubscribeGesture();
+
+        delete mBgCanvas;
+        delete mFgCanvas;
+
+        /* This is the very last step, we will be destroyed here */
+        if (mMenuInterface)
+            mMenuInterface->onMenuAction(MENUACTION_EXIT, GESTURE_DOWN);
     }
 }

@@ -41,26 +41,6 @@ int main(void)
     Desktop desktop(displayInterface);
 
     PngStorage::getInstance().init();
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/refresh.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/house.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/01d.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/01n.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/02d.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/02n.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/03d.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/03n.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/04d.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/04n.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/09d.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/09n.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/10d.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/10n.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/11d.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/11n.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/13d.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/13n.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/50d.png");
-    PngStorage::getInstance().loadPng("/usr/share/wlanclock/images/weather/50n.png");
 
     if (0 != UbusServer::getInstance().start())
     {
@@ -70,6 +50,7 @@ int main(void)
     while(UbusServer::getInstance().isRunning())
     {
         SysTimer::getInstance().waitAndProcess();
+        UbusServer::getInstance().process();
     }
 
     UbusServer::getInstance().stop();

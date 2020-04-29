@@ -211,7 +211,19 @@ void Animator::finish(void)
     if (! mRunning)
         return;
 
-    /* TODO: finalize the animation */
-    //tick();
+    switch (mAnimType)
+    {
+        case ANIM_TYPE_OPACITY:
+            mTick = 255;
+            break;
+        /* Intentional fall-through */
+        case ANIM_TYPE_SLIDE:
+        case ANIM_TYPE_SLIDE_BG:
+        case ANIM_TYPE_SHIFT:
+            mXfg = 0;
+            mYfg = 0;
+            break;
+    }
+    tick();
     mRunning = false;
 }

@@ -1,7 +1,7 @@
 #include "SpiDisplayInterface.h"
 #include "gpio_ctrl.h"
 #include "spi_ctrl.h"
-#include "uci_reader.h"
+#include "UciReader.h"
 #include "Canvas.h"
 
 #include "unistd.h"
@@ -14,21 +14,23 @@ SpiDisplayInterface::SpiDisplayInterface()
     ,mDisplayBufferIndex(0)
     ,mNewBrightness(false)
     ,mNewDisplayData(false)
+    ,mStopThread(false)
 {
-    char *dat_ncfg_gpio = uci_reader_get(CONFIG_FILE, CONFIG_SECTION, CONFIG_KEY_GPIO);
-    if (dat_ncfg_gpio)
+    std::string dat_ncfg_gpio = UciReader::getInstance().getKey(Config::UciPaths::GPIO);
+    if (0 != dat_ncfg_gpio.length())
     {
         mGpio = std::stoi(dat_ncfg_gpio);
     }
     gpio_ctrl_init(mGpio);
     gpio_ctrl_set_dir(mGpio, GPIO_CTRL_DIR_OUT);
 
-    char *spidev = uci_reader_get(CONFIG_FILE, CONFIG_SECTION, CONFIG_KEY_SPIDEV);
-    mSpiFd = spi_init(spidev, SPI_SPEED);
+    std::string spidev = UciReader::getInstance().getKey(Config::UciPaths::SPIDEV);
+    mSpiFd = spi_init(spidev.c_str(), SPI_SPEED);
 
     mDisplayBuffer[0] = nullptr;
     mDisplayBuffer[1] = nullptr;
     mDestCanvas = new Canvas<CANVAS_COLOR_4BIT>(Config::Display::WIDTH, Config::Display::HEIGHT);
+    mDisplayBufferSize = mDestCanvas->getSize();
 }
 
 SpiDisplayInterface::~SpiDisplayInterface()
@@ -175,15 +177,9 @@ void SpiDisplayInterface::update()
     std::unique_lock<std::mutex> lock(mThreadMutex);
     if (mDisplayBuffer[mDisplayBufferIndex] == nullptr)
     {
-        mDisplayBuffer[mDisplayBufferIndex] = new char[mDestCanvas->getSize()];
-        mDisplayBufferSize = mDestCanvas->getSize();
+        mDisplayBuffer[mDisplayBufferIndex] = new char[mDisplayBufferSize];
     }
-    if (mDisplayBufferSize != mDestCanvas->getSize())
-    {
-        std::cerr << "mDisplayBufferSize != canvas.getSize()" << std::endl;
-        return;
-    }
-    memcpy(mDisplayBuffer[mDisplayBufferIndex], mDestCanvas->getData(), mDestCanvas->getSize());
+    memcpy(mDisplayBuffer[mDisplayBufferIndex], mDestCanvas->getData(), mDisplayBufferSize);
     mNewDisplayData = true;
     mThreadCond.notify_one();
 }

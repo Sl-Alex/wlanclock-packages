@@ -2,6 +2,7 @@
 #define UBUSSERVER_H
 
 #include <cstdint>
+#include <mutex>
 
 class IGestureReceiver
 {
@@ -32,6 +33,13 @@ class IPresHumTempReceiver
     virtual void onPresHumTemp(double pres, double hum, double temp) = 0;
 };
 
+class IRelPosReceiver
+{
+  public:
+    virtual ~IRelPosReceiver() {};
+    virtual void onRelPos(int rel_x, int rel_y) = 0;
+};
+
 class UbusServer
 {
     public:
@@ -48,6 +56,7 @@ class UbusServer
 
         int start(void);
         int stop (void);
+        void process (void);
         bool isRunning(void);
 
         UbusServer(UbusServer const&)  = delete;
@@ -77,16 +86,41 @@ class UbusServer
         {
             fPresHumTempReceiver = nullptr;
         }
+        void subscribeRelPos(IRelPosReceiver &receiver)
+        {
+            fRelPosReceiver = &receiver;
+        }
+        void unsubscribeRelPos()
+        {
+            fRelPosReceiver = nullptr;
+        }
     private:
         UbusServer();
 
         static void uBusCbGesture(uint32_t gesture);
         static void uBusCbBrightness(uint32_t brightness);
         static void uBusCbPresHumTemp(double pressure, double humidity, double temperature);
+        static void uBusCbRelPos(int rel_x, int rel_y);
 
         IGestureReceiver     *fGestureReceiver;
         IBrightnessReceiver  *fBrightnessReceiver;
         IPresHumTempReceiver *fPresHumTempReceiver;
+        IRelPosReceiver      *fRelPosReceiver;
+
+        uint32_t            mLastBrightness;
+        uint32_t            mLastGesture;
+        double              mLastPressure;
+        double              mLastHumidity;
+        double              mLastTemperature;
+        int                 mRelX;
+        int                 mRelY;
+
+        bool                mNewGesture;
+        bool                mNewBrightness;
+        bool                mNewPresHumTemp;
+        bool                mNewRelPos;
+
+        static std::mutex   mUbusMutex;
 };
 
 #endif /* UBUS_SERVER_H */

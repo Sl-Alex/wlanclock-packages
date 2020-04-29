@@ -8,7 +8,8 @@ extern "C" {
 
 #include <stdint.h>
 
-void ubus_client_send(uint32_t gesture);
+void ubus_client_send_gesture(uint32_t gesture);
+void ubus_client_send_rel(int32_t x, int32_t y);
 
 #ifdef __cplusplus
 }

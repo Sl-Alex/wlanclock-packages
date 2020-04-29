@@ -1,7 +1,7 @@
 #include "Fonts.h"
 #include "AbstractCanvas.h"
 #include <cstdlib>
-#include <algorithm>
+#include <utility>
 #include <iostream>
 #include <ft2build.h>
 #include FT_FREETYPE_H
@@ -98,6 +98,21 @@ void AbstractCanvas::drawRect(int x1, int y1, int x2, int y2, rgba32_t value)
         drawLine(x2,y1+1, x2,y2-1, value);
     }
     drawLine(x1,y2, x2,y2, value);
+}
+
+void AbstractCanvas::drawFilledRect(int x1, int y1, int x2, int y2, rgba32_t value)
+{
+    if (x1 > x2)
+    {
+        int x = x2;
+        x2 = x1;
+        x1 = x;
+    }
+
+    for (int x = x1; x <= x2; x++)
+    {
+        drawLine(x,y1, x,y2, value);
+    }
 }
 
 int AbstractCanvas::drawText(Config::Fonts::Params params, std::string text, rgba32_t color)

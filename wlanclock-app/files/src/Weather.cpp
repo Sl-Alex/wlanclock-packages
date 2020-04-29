@@ -1,5 +1,6 @@
 #include "Weather.h" 
 #include "Config.h"
+#include "UciReader.h"
 #include <json-c/json.h>
 #include <curl/curl.h>
 #include <stdio.h>
@@ -18,6 +19,7 @@ Weather::Weather()
 
 void Weather::updateWeather()
 {
+    mWeatherUrl = UciReader::getInstance().getKey(Config::UciPaths::WEATHER_URL);
     std::string json = getRawWeatherData();
     parseRawWeatherData(json);
     mUpdateDone = true;
@@ -87,7 +89,14 @@ int Weather::parseWeatherInfo(WeatherInfo &info, struct json_object *object)
 
     if (json_object_object_get_ex(object, "rain", &tmp_obj))
     {
-        info.rain = json_object_get_double(tmp_obj);
+        if (json_object_object_get_ex(tmp_obj, "1h", &tmp_obj))
+        {
+            info.rain = json_object_get_double(tmp_obj);
+        }
+        else
+        {
+            info.rain = 0;
+        }
     }
     else
     {
@@ -101,6 +110,15 @@ int Weather::parseWeatherInfo(WeatherInfo &info, struct json_object *object)
     else
     {
         info.snow = 0;
+    }
+
+    if (json_object_object_get_ex(object, "clouds", &tmp_obj))
+    {
+        info.clouds = json_object_get_double(tmp_obj);
+    }
+    else
+    {
+        info.clouds = 0;
     }
 
     if (!json_object_object_get_ex(object, "weather", &weather_obj))
@@ -157,7 +175,7 @@ std::string Weather::getRawWeatherData()
         goto CURL_CLEANUP;
     }
 
-    code = curl_easy_setopt(conn, CURLOPT_URL, Config::Weather::UPDATE_URL);
+    code = curl_easy_setopt(conn, CURLOPT_URL, mWeatherUrl.c_str());
     if(code != CURLE_OK) {
         fprintf(stderr, "Failed to set URL [%s]\n", errorBuffer);
         goto CURL_CLEANUP;

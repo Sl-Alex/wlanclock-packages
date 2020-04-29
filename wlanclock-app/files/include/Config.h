@@ -8,9 +8,11 @@ namespace Config
     class Display
     {
         public:
-            static constexpr int WIDTH     = 128;
-            static constexpr int HEIGHT    = 32;
+            static constexpr int WIDTH           = 128;
+            static constexpr int HEIGHT          = 32;
             static constexpr int UPDATE_INTERVAL = 10;
+            static constexpr int MENU_TIMEOUT    = 15 * 1000;
+            static uint32_t      color;
     };
     class Fonts
     {
@@ -29,15 +31,30 @@ namespace Config
                 FONT_WEATHER = 2
             };
             static constexpr const char* FONTS_DIR  = "/usr/share/wlanclock/fonts/";
-            static constexpr const char* IMAGES_DIR = "/usr/share/wlanclock/images/";
             static constexpr const char* FONTS[] = {"NanumGothic-ExtraBold.ttf"};
             static const Params PARAMS[];
+    };
+    class Images
+    {
+        public:
+            static constexpr const char* IMAGES_DIR = "/usr/share/wlanclock/images/";
+            static const char* IMAGES[20];
     };
     class Weather
     {
         public:
-            static constexpr const char* UPDATE_URL = "https://api.openweathermap.org/data/2.5/onecall?lat={your_lat}&lon={your_lon}&units=metric&appid={your_key}";
             static constexpr int UPDATE_INTERVAL = 10 * 60 * 1000; /* 10 minutes */
+    };
+    class UciPaths
+    {
+        public:
+            /* SPI interface settings */
+            static constexpr const char* SPIDEV = "wlanclock.app.device";
+            static constexpr const char* GPIO   = "wlanclock.app.dat_ncfg_gpio";
+            /* Weather URL */
+            static constexpr const char* WEATHER_URL = "wlanclock.app.weather_url";
+            /* Main clock color */
+            static constexpr const char* COLOR  = "wlanclock.app.color";
     };
 }
 

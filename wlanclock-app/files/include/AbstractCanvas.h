@@ -32,6 +32,7 @@ class AbstractCanvas
 
         void drawLine(int x1, int y1, int x2, int y2, rgba32_t value);
         void drawRect(int x1, int y1, int x2, int y2, rgba32_t value);
+        void drawFilledRect(int x1, int y1, int x2, int y2, rgba32_t value);
         int  drawText(Config::Fonts::Params params, std::string text, rgba32_t color);
         int  drawText(Config::Fonts::Params params, std::wstring text, rgba32_t color);
         void copyAreaTo(Area area, AbstractCanvas &canvas, int to_x = 0, int to_y = 0);

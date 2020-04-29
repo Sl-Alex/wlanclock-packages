@@ -22,6 +22,7 @@ class Weather: public ISysTimer
             uint32_t weatherId;
             float rain;
             float snow;
+            float clouds;
             std::string weatherIcon;
         };
         static Weather& getInstance()
@@ -48,6 +49,7 @@ class Weather: public ISysTimer
         std::string getRawWeatherData();
         int parseRawWeatherData(std::string json);
         int parseWeatherInfo(WeatherInfo &info, json_object *);
+        std::string mWeatherUrl;
 
         WeatherInfo                 mCurrentWeather;
         std::vector<WeatherInfo>    mWeatherForecast;

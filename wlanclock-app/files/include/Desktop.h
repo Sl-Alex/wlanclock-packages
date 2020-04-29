@@ -1,6 +1,7 @@
 #ifndef DEKSTOP_H
 #define DEKSTOP_H
 
+#include "MenuColor.h"
 #include "MenuForecast.h"
 #include "MenuLocalStatus.h"
 #include "AbstractCanvas.h"
@@ -9,7 +10,6 @@
 #include "UbusServer.h"
 #include "Fonts.h"
 #include "Animator.h"
-#include <mutex>
 
 class Desktop: public ISysTimer, public IGestureReceiver, public IMenuInteraction
 {
@@ -21,19 +21,17 @@ class Desktop: public ISysTimer, public IGestureReceiver, public IMenuInteractio
         void drawDesktop();
         void onTimer();
         void onGesture(Gesture gesture);
-        void onMenuAction(IMenuInteraction::MenuAction action);
+        virtual void onMenuAction(IMenuInteraction::MenuAction action, IGestureReceiver::Gesture gesture);
 
         AbstractCanvas *mBgCanvas;
         AbstractCanvas *mFgCanvas;
         AbstractDisplayInterface & mDisplayInterface;
         Animator mAnimator;
-        Gesture mLastGesture;
-        rgba32_t mColor;
         tm mTm;
 
-        MenuForecast *mMenuForecast;
+        MenuForecast    *mMenuForecast;
         MenuLocalStatus *mMenuLocalStatus;
-        std::mutex mGestureMutex;
+        MenuColor    *mMenuSettings;
 };
 
 #endif /* DESKTOP_H */

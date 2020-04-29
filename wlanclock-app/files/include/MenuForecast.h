@@ -5,12 +5,9 @@
 #include "AbstractDisplayInterface.h"
 #include "SysTimer.h"
 #include "UbusServer.h"
-#include "Fonts.h"
-#include "Config.h"
 #include "Animator.h"
 #include "Weather.h"
 #include "Menu.h"
-#include <mutex>
 
 class MenuForecast: public ISysTimer, public IGestureReceiver, public IMenuInteraction
 {
@@ -23,7 +20,7 @@ class MenuForecast: public ISysTimer, public IGestureReceiver, public IMenuInter
         void drawRefreshItem();
         void drawForecastItem();
         virtual void onGesture(Gesture gesture);
-        virtual void onMenuAction(MenuAction action);
+        virtual void onMenuAction(IMenuInteraction::MenuAction action, IGestureReceiver::Gesture gesture);
 
         IMenuInteraction *mMenuInterface;
 
@@ -31,7 +28,6 @@ class MenuForecast: public ISysTimer, public IGestureReceiver, public IMenuInter
         AbstractCanvas *mFgCanvas;
         AbstractDisplayInterface & mDisplayInterface;
         Animator mAnimator;
-        std::mutex mGestureMutex;
         std::vector<Weather::WeatherInfo> mWeatherForecast;
         int mForecastItemIndex;
 };

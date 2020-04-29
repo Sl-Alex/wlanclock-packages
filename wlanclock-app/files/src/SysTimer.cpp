@@ -139,6 +139,22 @@ void SysTimer::waitAndProcess(void)
                 }
 
                 iface->onTimer();
+                /* iface could be deleted at onTimer */
+                /* Search for it, do nothing if found */
+                auto it2 = mSubscribers.begin();
+                while (it2 != mSubscribers.end())
+                {
+                    if (it2->iface == iface)
+                    {
+                        break;
+                    }
+                    it2++;
+                }
+                /* Was not found */
+                if (it2 == mSubscribers.end())
+                {
+                    erased = true;
+                }
             }
         }
         if (!erased)
@@ -156,6 +172,7 @@ void SysTimer::waitAndProcess(void)
             }
         }
     }
-    usleep(1000 * getTsDiffInMs(ts_waitfor, ts_now));
+    //usleep(1000 * getTsDiffInMs(ts_waitfor, ts_now));
+    usleep(1000);
 }
 

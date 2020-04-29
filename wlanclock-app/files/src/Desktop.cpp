@@ -1,13 +1,24 @@
 #include "Desktop.h"
 #include "Canvas.h"
 #include "Config.h"
+#include "UciReader.h"
 #include <iostream>
 
 Desktop::Desktop(AbstractDisplayInterface &displayIface)
     : mDisplayInterface(displayIface)
     , mMenuForecast(nullptr)
     , mMenuLocalStatus(nullptr)
+    , mMenuSettings(nullptr)
 {
+    rgba32_t color;
+    std::string colorString = UciReader::getInstance().getKey(Config::UciPaths::COLOR);
+    try {
+        color = std::stoul(colorString, 0, 16);
+    } catch(...) {
+        std::cerr << "Can't get color" << std::endl;
+        color = 0x808080FF;
+    }
+    Config::Display::color = color;
     SysTimer::getInstance().subscribe(*this, Config::Display::UPDATE_INTERVAL, true);
     mBgCanvas   = new Canvas<CANVAS_COLOR_4BIT>(Config::Display::WIDTH, Config::Display::HEIGHT);
     mFgCanvas   = new Canvas<CANVAS_COLOR_4BIT>(Config::Display::WIDTH, Config::Display::HEIGHT);
@@ -26,24 +37,18 @@ void Desktop::drawDesktop()
     char buff[100];
     snprintf(buff, sizeof(buff), "%02d:%02d", mTm.tm_hour, mTm.tm_min);
     mFgCanvas->clear();
-    mFgCanvas->drawText(Config::Fonts::PARAMS[Config::Fonts::FONT_HOURS_MINS], std::string(buff), mColor);
+    mFgCanvas->drawText(Config::Fonts::PARAMS[Config::Fonts::FONT_HOURS_MINS], std::string(buff), Config::Display::color);
     snprintf(buff, sizeof(buff), "%02d", mTm.tm_sec);
-    mFgCanvas->drawText(Config::Fonts::PARAMS[Config::Fonts::FONT_SECONDS], std::string(buff), mColor);
+    mFgCanvas->drawText(Config::Fonts::PARAMS[Config::Fonts::FONT_SECONDS], std::string(buff), Config::Display::color);
 }
 
 void Desktop::onTimer()
 {
-    std::lock_guard<std::mutex> lock(mGestureMutex);
-    static uint8_t r = 255;
-    static uint8_t g = 0;
-    static uint8_t b = 0;
-    static uint8_t step = 0;
     time_t t = time(NULL);
     tm newTm = *localtime(&t);
     if (!mAnimator.isRunning() && memcmp(&newTm, &mTm, sizeof(mTm)))
     {
         memcpy(&mTm, &newTm, sizeof(mTm));
-        mColor = ((uint32_t)r << 24) | ((uint32_t)g << 16) | ((uint32_t)b << 8);
         drawDesktop();
         mAnimator.setFgBgDest(*mFgCanvas, *mBgCanvas, *mDisplayInterface.getCanvas());
         mAnimator.setDir(Animator::ANIM_DIR_DOWN);
@@ -56,39 +61,10 @@ void Desktop::onTimer()
         mAnimator.tick();
         mDisplayInterface.update();
     }
-    switch(step)
-    {
-    case 0:
-        if (g!=255) g++;
-        if (g==255) step = 1;
-        break;
-    case 1:
-        if (r!=0) r--;
-        if (r==0) step = 2;
-        break;
-    case 2:
-        if (b!=255) b++;
-        if (b==255) step = 3;
-        break;
-    case 3:
-        if (g!=0) g--;
-        if (g==0) step = 4;
-        break;
-    case 4:
-        if (r!=255) r++;
-        if (r==255) step = 5;
-        break;
-    case 5:
-        if (b!=0) b--;
-        if (b==0) step = 0;
-        break;
-    }
 }
 
 void Desktop::onGesture(Gesture gesture)
 {
-    std::lock_guard<std::mutex> lock(mGestureMutex);
-    mLastGesture = gesture;
     switch(gesture)
     {
         case GESTURE_UP:
@@ -103,15 +79,27 @@ void Desktop::onGesture(Gesture gesture)
             UbusServer::getInstance().unsubscribeGesture();
             mMenuLocalStatus = new MenuLocalStatus(mDisplayInterface, this);
             break;
+        case GESTURE_LEFT:
+            mAnimator.finish();
+            SysTimer::getInstance().unsubscribe(*this);
+            UbusServer::getInstance().unsubscribeGesture();
+            mMenuSettings = new MenuColor(mDisplayInterface, this);
+            break;
         default:
             break;
     }
 }
 
-void Desktop::onMenuAction(IMenuInteraction::MenuAction action)
+void Desktop::onMenuAction(IMenuInteraction::MenuAction action, IGestureReceiver::Gesture gesture)
 {
     if (action == MENUACTION_EXIT)
     {
+        delete mMenuForecast;
+        delete mMenuLocalStatus;
+        delete mMenuSettings;
+        mMenuForecast    = nullptr;
+        mMenuLocalStatus = nullptr;
+        mMenuSettings    = nullptr;
         /* Re-subscribe to what we need */
         SysTimer::getInstance().subscribe(*this, Config::Display::UPDATE_INTERVAL, true);
         UbusServer::getInstance().subscribeGesture(*this);
@@ -123,22 +111,23 @@ void Desktop::onMenuAction(IMenuInteraction::MenuAction action)
         /* Set common animation parameters */
         mAnimator.setFgBgDest(*mFgCanvas, *mBgCanvas, *mDisplayInterface.getCanvas());
         mAnimator.setType(Animator::ANIM_TYPE_SLIDE_BG);
-        mAnimator.setSpeed(2);
-        switch (mLastGesture)
+        switch (gesture)
         {
             case GESTURE_UP:
-                delete mMenuForecast;
-                mAnimator.setDir(Animator::ANIM_DIR_DOWN);
-                break;
-            case GESTURE_DOWN:
-                delete mMenuLocalStatus;
+                mAnimator.setSpeed(2);
                 mAnimator.setDir(Animator::ANIM_DIR_UP);
                 break;
+            case GESTURE_DOWN:
+                mAnimator.setSpeed(2);
+                mAnimator.setDir(Animator::ANIM_DIR_DOWN);
+                break;
             case GESTURE_LEFT:
-                mAnimator.setDir(Animator::ANIM_DIR_RIGHT);
+                mAnimator.setSpeed(6);
+                mAnimator.setDir(Animator::ANIM_DIR_LEFT);
                 break;
             case GESTURE_RIGHT:
-                mAnimator.setDir(Animator::ANIM_DIR_LEFT);
+                mAnimator.setSpeed(6);
+                mAnimator.setDir(Animator::ANIM_DIR_RIGHT);
                 break;
             default:
                 break;

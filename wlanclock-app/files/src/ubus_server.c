@@ -23,6 +23,8 @@ int ubus_server_is_running()
 /* Enum for EGI policy order */
 enum {
     WLANCLOCK_DATA_GESTURE,
+    WLANCLOCK_DATA_REL_X,
+    WLANCLOCK_DATA_REL_Y,
     WLANCLOCK_DATA_BRIGHTNESS,
     WLANCLOCK_DATA_PRESSURE,
     WLANCLOCK_DATA_HUMIDITY,
@@ -33,6 +35,7 @@ enum {
 static ubus_cb_gesture_t       cb_gesture       = NULL;
 static ubus_cb_brightness_t    cb_brightness    = NULL;
 static ubus_cb_pres_hum_temp_t cb_pres_hum_temp = NULL;
+static ubus_cb_rel_pos_t       cb_rel_pos       = NULL;
 
 void ubus_server_set_cb_gesture      (ubus_cb_gesture_t       cb)
 {
@@ -49,10 +52,17 @@ void ubus_server_set_cb_pres_hum_temp(ubus_cb_pres_hum_temp_t cb)
     cb_pres_hum_temp = cb;
 }
 
+void ubus_server_set_cb_rel_pos(ubus_cb_rel_pos_t cb)
+{
+    cb_rel_pos = cb;
+}
+
 /* Ubus Policy */
 static const struct blobmsg_policy wlanclock_data_policy[] =
 {
     [WLANCLOCK_DATA_GESTURE]     = { .name="gesture",     .type=BLOBMSG_TYPE_INT32  },
+    [WLANCLOCK_DATA_REL_X]     =   { .name="rel_x",       .type=BLOBMSG_TYPE_INT32  },
+    [WLANCLOCK_DATA_REL_Y]     =   { .name="rel_y",       .type=BLOBMSG_TYPE_INT32  },
     [WLANCLOCK_DATA_BRIGHTNESS]  = { .name="brightness",  .type=BLOBMSG_TYPE_INT32  },
     [WLANCLOCK_DATA_PRESSURE]    = { .name="pressure",    .type=BLOBMSG_TYPE_DOUBLE },
     [WLANCLOCK_DATA_HUMIDITY]    = { .name="humidity",    .type=BLOBMSG_TYPE_DOUBLE },
@@ -114,6 +124,17 @@ static int wlanclock_data_handler( struct ubus_context *ctx, struct ubus_object 
     else if (tb[WLANCLOCK_DATA_PRESSURE] || tb[WLANCLOCK_DATA_HUMIDITY] || tb[WLANCLOCK_DATA_TEMPERATURE])
     {
         fprintf(stderr, "Pressure, humidity or temperature is missing. All must be in one message\n");
+    }
+    if(tb[WLANCLOCK_DATA_REL_X] && tb[WLANCLOCK_DATA_REL_Y])
+    {
+        int rel_x = blobmsg_get_u32(tb[WLANCLOCK_DATA_REL_X]);
+        int rel_y = blobmsg_get_u32(tb[WLANCLOCK_DATA_REL_Y]);
+        if (cb_rel_pos)
+            cb_rel_pos(rel_x, rel_y);
+    }
+    else if (tb[WLANCLOCK_DATA_REL_X] || tb[WLANCLOCK_DATA_REL_Y])
+    {
+        fprintf(stderr, "Either rel_x or rel_y is missing. Both must be in one message\n");
     }
 
     /* Do some job here according to caller's request */

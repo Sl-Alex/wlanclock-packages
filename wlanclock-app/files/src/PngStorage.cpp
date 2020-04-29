@@ -132,11 +132,17 @@ FCLOSE:
 
 void PngStorage::init()
 {
+    std::string imagesPath = Config::Images::IMAGES_DIR;
+    for (size_t i = 0; i < sizeof(Config::Images::IMAGES)/sizeof(Config::Images::IMAGES[0]); i++)
+    {
+        loadPng(std::string(Config::Images::IMAGES[i]));
+    }
 }
 
 int PngStorage::loadPng(std::string filename)
 {
-    /* TODO: prepend PNG folder path */
+    std::string imagesPath = Config::Images::IMAGES_DIR;
+    filename = imagesPath + filename;
     for (auto it = mPngStorage.begin(); it != mPngStorage.end(); it++)
     {
         if (it->name == filename)
@@ -161,6 +167,8 @@ int PngStorage::loadPng(std::string filename)
 
 AbstractCanvas *PngStorage::getCanvas(std::string filename)
 {
+    std::string imagesPath = Config::Images::IMAGES_DIR;
+    filename = imagesPath + filename;
     for (auto it = mPngStorage.begin(); it != mPngStorage.end(); it++)
     {
         if (it->name == filename)

@@ -1,0 +1,16 @@
+config application 'app'
+        # Output device
+        option device '/dev/spidev0.1'
+        option dat_ncfg_gpio '1'
+        option color 'A49200FF'
+
+config application 'input'
+        # Device
+        option device '/dev/input/event1'
+        # Touchpad parameters
+        option threshold '30'
+        option swap_axes '0'
+        option invert_x '0'
+        option invert_y '0'
+        # Gesture timeout, ms
+        option timeout '50'

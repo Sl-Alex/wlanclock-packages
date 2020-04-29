@@ -9,6 +9,7 @@ PKG_RELEASE:=1
 # Source settings (i.e. where to find the source codes)
 # This is a custom variable, used below
 SOURCE_DIR:=files
+CONF_DIR:=config
 
 include $(INCLUDE_DIR)/package.mk
 
@@ -25,6 +26,11 @@ endef
 # Package description; a more verbose description on what our package does
 define Package/$(PKG_NAME)/description
 	WlanClock main application
+endef
+
+# Configuration files
+define Package/$(PKG_NAME)/conffiles
+/etc/config/wlanclock
 endef
 
 # Package preparation instructions; create the build directory and copy the source code. 
@@ -47,7 +53,12 @@ endef
 # Package install instructions; create a directory inside the package to hold our executable, and then copy the executable we built previously into the folder
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_DIR) $(1)/etc/config
+	$(INSTALL_DIR) $(1)/etc/init.d
+	# install the binary
+	$(INSTALL_BIN) $(CONF_DIR)/init.d/wlanclock.sh $(1)/etc/init.d/wlanclock
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/bin/$(PKG_NAME) $(1)/usr/bin
+	$(INSTALL_CONF) $(CONF_DIR)/wlanclock $(1)/etc/config/wlanclock
 endef
 
 # This command is always the last, it uses the definitions and variables we give above in order to get the job done

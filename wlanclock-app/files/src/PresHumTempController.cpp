@@ -15,7 +15,6 @@ PresHumTempController::~PresHumTempController()
 
 bool PresHumTempController::getPresHumTemp(float &pres, float &hum, float &temp)
 {
-    std::lock_guard<std::mutex> lock(mDataMutex);
     /* Update anyway */
     pres = mLastPres;
     hum  = mLastHum;
@@ -33,9 +32,8 @@ bool PresHumTempController::getPresHumTemp(float &pres, float &hum, float &temp)
 
 void PresHumTempController::onPresHumTemp(double pres, double hum, double temp)
 {
-    std::lock_guard<std::mutex> lock(mDataMutex);
     mLastPres = pres;
     mLastHum  = hum;
     mLastTemp = temp;
-    mNewDataAvailable = false;
+    mNewDataAvailable = true;
 }

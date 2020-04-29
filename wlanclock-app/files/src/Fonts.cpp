@@ -4,8 +4,6 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "uci_reader.h"
-
 Fonts::Fonts()
 {
     int rc = FT_Init_FreeType(&mFtLibrary);

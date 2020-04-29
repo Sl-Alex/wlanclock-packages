@@ -1,14 +1,7 @@
 #ifndef MENU_H
 #define MENU_H
 
-#include "AbstractCanvas.h"
-#include "AbstractDisplayInterface.h"
-#include "SysTimer.h"
 #include "UbusServer.h"
-#include "Fonts.h"
-#include "Animator.h"
-#include "Weather.h"
-#include <mutex>
 
 class IMenuInteraction
 {
@@ -18,7 +11,7 @@ class IMenuInteraction
         MENUACTION_EXIT = 0
     } MenuAction;
     virtual ~IMenuInteraction() {};
-    virtual void onMenuAction(MenuAction action) = 0;
+    virtual void onMenuAction(IMenuInteraction::MenuAction action, IGestureReceiver::Gesture gesture) = 0;
 };
 
 #endif /* MENU_H */

@@ -4,9 +4,7 @@
 #include "UbusServer.h"
 #include "AbstractDisplayInterface.h"
 
-#include <cstdint>
 #include <vector>
-#include <mutex>
 
 class PresHumTempController: public IPresHumTempReceiver
 {
@@ -34,8 +32,6 @@ class PresHumTempController: public IPresHumTempReceiver
         float mLastHum;
         float mLastTemp;
         bool  mNewDataAvailable;
-
-        std::mutex mDataMutex;
 };
 
 #endif /* PRESHUMTEMPCONTROLLER_H */

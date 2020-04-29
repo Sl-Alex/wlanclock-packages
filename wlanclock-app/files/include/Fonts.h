@@ -34,16 +34,6 @@ class Fonts
 
         FT_Library  mFtLibrary;
         std::vector<FT_Face> mFtFaces;
-
-        static constexpr const char* CONFIG_FILE          = "wlanclock";
-        static constexpr const char* CONFIG_SECTION       = "app";
-
-        static constexpr const char* FONT_KEY_INDEX       = "index";
-        static constexpr const char* FONT_KEY_SIZE_H      = "size_h";
-        static constexpr const char* FONT_KEY_SIZE_V      = "size_v";
-        static constexpr const char* FONT_KEY_BASE_X      = "base_x";
-        static constexpr const char* FONT_KEY_BASE_Y      = "base_y";
-
 };
 
 #endif /* FONTS_H */

@@ -4,9 +4,7 @@
 #include "UbusServer.h"
 #include "AbstractDisplayInterface.h"
 
-#include <time.h>
 #include <cstdint>
-#include <vector>
 
 class BrightnessController: public IBrightnessReceiver
 {

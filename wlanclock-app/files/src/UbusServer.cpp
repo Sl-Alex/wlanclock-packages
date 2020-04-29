@@ -2,10 +2,13 @@
 #include "ubus_server.h"
 #include <iostream>
 
+std::mutex UbusServer::mUbusMutex;
+
 UbusServer::UbusServer()
     :fGestureReceiver(nullptr)
     ,fBrightnessReceiver(nullptr)
     ,fPresHumTempReceiver(nullptr)
+    ,fRelPosReceiver(nullptr)
 {
 }
 
@@ -14,6 +17,7 @@ int UbusServer::start(void)
     ubus_server_set_cb_gesture(uBusCbGesture);
     ubus_server_set_cb_brightness(uBusCbBrightness);
     ubus_server_set_cb_pres_hum_temp(uBusCbPresHumTemp);
+    ubus_server_set_cb_rel_pos(uBusCbRelPos);
     int rc = ubus_server_init();
     if (0 == rc)
     {
@@ -29,6 +33,37 @@ int UbusServer::stop(void)
     return 0;
 }
 
+void UbusServer::process()
+{
+    std::lock_guard<std::mutex> lock(mUbusMutex);
+    if (mNewGesture)
+    {
+        if (getInstance().fGestureReceiver)
+            getInstance().fGestureReceiver->onGesture((IGestureReceiver::Gesture)mLastGesture);
+    }
+    if (mNewBrightness)
+    {
+        if (getInstance().fBrightnessReceiver)
+            getInstance().fBrightnessReceiver->onBrightness(mLastBrightness);
+    }
+    if (mNewPresHumTemp)
+    {
+        if (getInstance().fPresHumTempReceiver)
+            getInstance().fPresHumTempReceiver->onPresHumTemp(mLastPressure, mLastHumidity, mLastTemperature);
+    }
+    if (mNewRelPos)
+    {
+        if (getInstance().fRelPosReceiver)
+            getInstance().fRelPosReceiver->onRelPos(mRelX, mRelY);
+        mRelX = 0;
+        mRelY = 0;
+    }
+    mNewGesture = false;
+    mNewBrightness = false;
+    mNewPresHumTemp = false;
+    mNewRelPos = false;
+}
+
 bool UbusServer::isRunning(void)
 {
     return ubus_server_is_running();
@@ -36,20 +71,33 @@ bool UbusServer::isRunning(void)
 
 void UbusServer::uBusCbGesture(uint32_t gesture)
 {
-    if (getInstance().fGestureReceiver)
-        getInstance().fGestureReceiver->onGesture((IGestureReceiver::Gesture)gesture);
+    std::lock_guard<std::mutex> lock(mUbusMutex);
+    UbusServer::getInstance().mLastGesture = gesture;
+    UbusServer::getInstance().mNewGesture = true;
 }
 
 void UbusServer::uBusCbBrightness(uint32_t brightness)
 {
-    if (getInstance().fBrightnessReceiver)
-        getInstance().fBrightnessReceiver->onBrightness(brightness);
+    std::lock_guard<std::mutex> lock(mUbusMutex);
+    UbusServer::getInstance().mLastBrightness = brightness;
+    UbusServer::getInstance().mNewBrightness = true;
 }
 
 void UbusServer::uBusCbPresHumTemp(double pressure, double humidity, double temperature)
 {
-    if (getInstance().fPresHumTempReceiver)
-        getInstance().fPresHumTempReceiver->onPresHumTemp(pressure, humidity, temperature);
+    std::lock_guard<std::mutex> lock(mUbusMutex);
+    UbusServer::getInstance().mLastPressure = pressure;
+    UbusServer::getInstance().mLastHumidity = humidity;
+    UbusServer::getInstance().mLastTemperature = temperature;
+    UbusServer::getInstance().mNewPresHumTemp = true;
+}
+
+void UbusServer::uBusCbRelPos(int rel_x, int rel_y)
+{
+    std::lock_guard<std::mutex> lock(mUbusMutex);
+    UbusServer::getInstance().mRelX += rel_x;
+    UbusServer::getInstance().mRelY += rel_y;
+    UbusServer::getInstance().mNewRelPos = true;
 }
 
 

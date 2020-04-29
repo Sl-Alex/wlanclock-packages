@@ -5,11 +5,8 @@
 #include "AbstractDisplayInterface.h"
 #include "SysTimer.h"
 #include "UbusServer.h"
-#include "Fonts.h"
 #include "Animator.h"
-#include "Weather.h"
 #include "Menu.h"
-#include <mutex>
 
 class MenuLocalStatus: public ISysTimer, public IGestureReceiver, public IMenuInteraction
 {
@@ -17,10 +14,12 @@ class MenuLocalStatus: public ISysTimer, public IGestureReceiver, public IMenuIn
         MenuLocalStatus(AbstractDisplayInterface &displayIface, IMenuInteraction *menuInterface = nullptr);
         virtual ~MenuLocalStatus(){};
 
+        void start();
+
     private:
         virtual void onTimer();
         virtual void onGesture(Gesture gesture);
-        virtual void onMenuAction(MenuAction action);
+        virtual void onMenuAction(IMenuInteraction::MenuAction action, IGestureReceiver::Gesture gesture);
 
         void drawCurrentStatus();
 
@@ -30,7 +29,6 @@ class MenuLocalStatus: public ISysTimer, public IGestureReceiver, public IMenuIn
         AbstractCanvas *mFgCanvas;
         AbstractDisplayInterface & mDisplayInterface;
         Animator mAnimator;
-        std::mutex mGestureMutex;
 };
 
 #endif /* MENULOCALSTATUS_H */

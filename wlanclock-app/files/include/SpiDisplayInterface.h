@@ -1,8 +1,6 @@
 #ifndef SPIDISPLAYINTERFACE_H
 #define SPIDISPLAYINTERFACE_H
 
-#include <string>
-#include "Config.h"
 #include "AbstractDisplayInterface.h"
 #include "spi_ctrl.h"
 #include <mutex>

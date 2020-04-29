@@ -25,6 +25,9 @@ static int dbtn = 0;
 static int ddx = 0;
 static int ddy = 0;
 
+static int last_x = 0;
+static int last_y = 0;
+
 static void
 print_abs_bits(struct libevdev *dev, int axis)
 {
@@ -104,14 +107,14 @@ void parse_gesture(int dx, int dy, int btn)
     ady = (dy > 0) ? dy : -dy;
     if ((adx < thr) && (ady < thr) && dbtn)
     {
-        printf("Single click\n");
+        ubus_client_send_gesture(4);
     }
     else if ((adx > thr) && (((float)adx/(float)ady) > prop))
     {
         printf("%s %s\n", dbtn ? "Drag" : "Swipe", (dx > 0) ? "right" : "left");
         if (dbtn == 0)
         {
-            ubus_client_send((dx > 0) ? 1 : 0);
+            ubus_client_send_gesture((dx > 0) ? 1 : 0);
         }
     }
     else if ((ady > thr) && (((float)ady/(float)adx) > prop))
@@ -119,7 +122,7 @@ void parse_gesture(int dx, int dy, int btn)
         printf("%s %s\n", dbtn ? "Drag" : "Swipe", (dy > 0) ? "down" : "up");
         if (dbtn == 0)
         {
-            ubus_client_send((dy > 0) ? 3 : 2);
+            ubus_client_send_gesture((dy > 0) ? 3 : 2);
         }
     }
     else
@@ -133,18 +136,25 @@ static int
 print_event(struct input_event *ev)
 {
     if (ev->type == EV_SYN)
+    {
         printf("Event: time %ld.%06ld, dx = %06d, dy = %06d%s\n",
                 ev->time.tv_sec,
                 ev->time.tv_usec,
                 dx,dy,
                 btn ? ", PRESSED" : "");
+        ubus_client_send_rel(last_x, last_y);
+        last_x = 0;
+        last_y = 0;
+    }
     else if ((ev->type == EV_REL) && (ev->code == REL_X))
     {
+        last_x = ev->value;
         dx += ev->value;
         ddx += ev->value;
     }
     else if ((ev->type == EV_REL) && (ev->code == REL_Y))
     {
+        last_y = ev->value;
         dy += ev->value;
         ddy += ev->value;
     }
