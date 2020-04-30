@@ -231,10 +231,12 @@ int Weather::parseRawWeatherData(std::string json)
     /* 2. Parse current weather json object */
     if (!json_object_object_get_ex(parsed_json, "current", &current))
     {
+        json_object_put(parsed_json);
         return 1;
     }
     if (0 != parseWeatherInfo(info, current))
     {
+        json_object_put(parsed_json);
         return 1;
     }
     mWeatherForecast.clear();
@@ -242,6 +244,7 @@ int Weather::parseRawWeatherData(std::string json)
     /* 3. Get hourly json array object */
     if (!json_object_object_get_ex(parsed_json, "hourly", &hourly))
     {
+        json_object_put(parsed_json);
         return 1;
     }
     size_t n_hourly = json_object_array_length(hourly);
@@ -251,14 +254,17 @@ int Weather::parseRawWeatherData(std::string json)
         json_object *hourly_item = json_object_array_get_idx(hourly, i);
         if (nullptr == hourly_item)
         {
+            json_object_put(parsed_json);
             return 1;
         }
         if (0 != parseWeatherInfo(info, hourly_item))
         {
+            json_object_put(parsed_json);
             return 1;
         }
         mWeatherForecast.push_back(info);
     }
 
+    json_object_put(parsed_json);
     return 0;
 }
