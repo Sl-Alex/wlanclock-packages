@@ -115,18 +115,17 @@ void AbstractCanvas::drawFilledRect(int x1, int y1, int x2, int y2, rgba32_t val
     }
 }
 
-int AbstractCanvas::drawText(Config::Fonts::Params params, std::string text, rgba32_t color)
+int AbstractCanvas::drawText(const Config::Fonts::Params &params, std::string text, rgba32_t color)
 {
     std::wstring wtext(text.begin(), text.end());
     return drawText(params, wtext, color);
 }
 
-int AbstractCanvas::drawText(Config::Fonts::Params params, std::wstring text, rgba32_t color)
+int AbstractCanvas::drawText(const Config::Fonts::Params &params, std::wstring text, rgba32_t color)
 {
     FT_Face face = Fonts::getInstance().getFontFace(params.index);
     FT_Set_Pixel_Sizes(face, params.size_h, params.size_v);
     int off_x = 0;
-    int off_y = 0;
     for (size_t i = 0; i < text.length(); i++)
     {
         unsigned int glyph_index = FT_Get_Char_Index( face, text[i] );
@@ -143,7 +142,7 @@ int AbstractCanvas::drawText(Config::Fonts::Params params, std::wstring text, rg
                                  FT_RENDER_MODE_NORMAL ); /* render mode */
         unsigned char *pdata = face->glyph->bitmap.buffer;
 
-        off_y = face->glyph->bitmap_top;
+        int off_y = face->glyph->bitmap_top;
 
         unsigned int horiBearX = face->glyph->metrics.horiBearingX >> 6;
 

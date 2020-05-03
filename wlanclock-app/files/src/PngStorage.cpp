@@ -132,7 +132,6 @@ FCLOSE:
 
 void PngStorage::init()
 {
-    std::string imagesPath = Config::Images::IMAGES_DIR;
     for (size_t i = 0; i < sizeof(Config::Images::IMAGES)/sizeof(Config::Images::IMAGES[0]); i++)
     {
         loadPng(std::string(Config::Images::IMAGES[i]));

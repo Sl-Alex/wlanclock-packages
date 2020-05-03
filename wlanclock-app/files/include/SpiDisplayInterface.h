@@ -10,7 +10,15 @@
 class SpiDisplayInterface : public AbstractDisplayInterface
 {
     public:
-        SpiDisplayInterface();
+        static SpiDisplayInterface& getInstance()
+        {
+            // Guaranteed to be destroyed.
+            // Instantiated on first use.
+            static SpiDisplayInterface instance;
+
+            return instance;
+        }
+
         virtual ~SpiDisplayInterface();
 
         virtual int start(void);
@@ -20,7 +28,10 @@ class SpiDisplayInterface : public AbstractDisplayInterface
         virtual void setBrightness(int brightness);
         virtual void update();
 
+        SpiDisplayInterface(SpiDisplayInterface const&)  = delete;
+        void operator=(SpiDisplayInterface const&) = delete;
     private:
+        SpiDisplayInterface();
 
         void spi_loop(void);
 

@@ -25,8 +25,17 @@ class Animator
 
         /// @brief Constructor
         Animator()
-            :mTick(0),
-            mRunning(false)
+            : pBackground(nullptr)
+            , pForeground(nullptr)
+            , pDest(nullptr)
+            , mAnimType(ANIM_TYPE_OPACITY)
+            , mAnimDir(ANIM_DIR_LEFT)
+            , mArea((Area){0,0,0,0})
+            , mXfg(0)
+            , mYfg(0)
+            , mSpeed(1)
+            , mTick(0)
+            , mRunning(false)
         {}
 
         /* Set foreground, background and destination canvas */

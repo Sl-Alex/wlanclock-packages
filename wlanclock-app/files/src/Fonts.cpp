@@ -26,7 +26,8 @@ int Fonts::init()
 {
     for (size_t i = 0; i < sizeof(Config::Fonts::FONTS)/sizeof(Config::Fonts::FONTS[0]); i++)
     {
-        Fonts::getInstance().loadFont(Config::Fonts::FONTS[i]);
+        std::string fontName = Config::Fonts::FONTS[i];
+        Fonts::getInstance().loadFont(fontName);
     }
     return 0;
 }
@@ -40,7 +41,7 @@ FT_Face Fonts::getFontFace(size_t index)
     return mFtFaces[index];
 }
 
-int Fonts::loadFont(std::string fontName)
+int Fonts::loadFont(std::string &fontName)
 {
     std::string path = std::string(Config::Fonts::FONTS_DIR)+ fontName;
     FT_Face face;

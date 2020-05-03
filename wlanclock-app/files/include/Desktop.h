@@ -14,7 +14,7 @@
 class Desktop: public ISysTimer, public IGestureReceiver, public IMenuInteraction
 {
     public:
-        Desktop(AbstractDisplayInterface &displayIface);
+        explicit Desktop(AbstractDisplayInterface &displayIface);
         ~Desktop();
 
     private:

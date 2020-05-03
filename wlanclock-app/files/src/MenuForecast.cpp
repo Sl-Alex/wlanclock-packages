@@ -7,9 +7,9 @@
 MenuForecast::MenuForecast(AbstractDisplayInterface &displayIface, IMenuInteraction *menuInterface)
     :mMenuInterface(menuInterface)
     ,mDisplayInterface(displayIface)
+    ,mWeatherForecast(Weather::getInstance().getWeatherForecast())
     ,mForecastItemIndex(0)
 {
-    mWeatherForecast = Weather::getInstance().getWeatherForecast();
     mBgCanvas   = new Canvas<CANVAS_COLOR_4BIT>(Config::Display::WIDTH, Config::Display::HEIGHT);
     mFgCanvas   = new Canvas<CANVAS_COLOR_4BIT>(Config::Display::WIDTH, Config::Display::HEIGHT);
     if (mWeatherForecast.size())

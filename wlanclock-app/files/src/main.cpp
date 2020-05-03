@@ -26,7 +26,6 @@
 
 int main(void)
 {
-    SpiDisplayInterface displayInterface;
     Fonts::getInstance().init();
 
     /* Initialize weather service and schedule the very first weather update */
@@ -34,11 +33,10 @@ int main(void)
     /* Initialize pressure/humidity/temperature controller */
     PresHumTempController::getInstance();
 
-    displayInterface.start();
-    displayInterface.setBrightness(0);
-    BrightnessController::getInstance().setDisplayInterface(&displayInterface);
-
-    Desktop desktop(displayInterface);
+    SpiDisplayInterface::getInstance().start();
+    SpiDisplayInterface::getInstance().setBrightness(0);
+    BrightnessController::getInstance().setDisplayInterface(&SpiDisplayInterface::getInstance());
+    Desktop desktop(SpiDisplayInterface::getInstance());
 
     PngStorage::getInstance().init();
 
@@ -54,7 +52,7 @@ int main(void)
     }
 
     UbusServer::getInstance().stop();
-    displayInterface.stop();
+    SpiDisplayInterface::getInstance().stop();
 
     std::cout << "Done" << std::endl;
 }

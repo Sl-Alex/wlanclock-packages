@@ -55,7 +55,17 @@ int Weather::parseWeatherInfo(WeatherInfo &info, struct json_object *object)
 {
     json_object *tmp_obj;
     json_object *weather_obj;
-    memset(&info, 0, sizeof(WeatherInfo));
+
+    info.timestamp = 0;
+    info.temperature = 0;
+    info.pressure = 0;
+    info.humidity = 0;
+    info.wind_speed = 0;
+    info.weatherId = 0;
+    info.rain = 0;
+    info.snow = 0;
+    info.clouds = 0;
+    info.weatherIcon = "";
 
     if (!json_object_object_get_ex(object, "dt", &tmp_obj))
     {

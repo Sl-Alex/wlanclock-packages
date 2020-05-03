@@ -30,7 +30,7 @@ class Fonts
     private:
         Fonts();
 
-        int loadFont(std::string fontName);
+        int loadFont(std::string &fontName);
 
         FT_Library  mFtLibrary;
         std::vector<FT_Face> mFtFaces;
